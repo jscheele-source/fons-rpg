@@ -119,7 +119,7 @@ func attack() -> void:
         var collider = combat_ray.get_collider()
         if collider != null and collider.has_method("take_damage"):
             var blade_level := int(GameState.skills["Blade"]["level"])
-            var damage := 8.0 + GameState.attributes["Strength"] * 0.10 + blade_level * 0.15
+            var damage: float = 8.0 + float(GameState.attributes["Strength"]) * 0.10 + float(blade_level) * 0.15
             collider.take_damage(damage, self)
             GameState.add_skill_xp("Blade", 1.5)
 
