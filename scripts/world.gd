@@ -8,6 +8,9 @@ const TRAVEL = preload("res://scripts/travel_marker.gd")
 const RITUAL = preload("res://scripts/ritual_object.gd")
 
 func _ready() -> void:
+    if bool(GameState.world_flags.get("load_on_start", false)):
+        GameState.load_game($Player)
+        GameState.world_flags["load_on_start"] = false
     _build_world()
 
 func _build_world() -> void:
