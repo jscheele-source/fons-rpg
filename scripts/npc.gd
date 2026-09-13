@@ -1,6 +1,8 @@
 extends StaticBody3D
 class_name FoundationNPC
 
+const VISUALS = preload("res://scripts/npc_visuals.gd")
+
 var display_name := "Traveler"
 var dialogue_id := "generic"
 var body_color := Color(0.5, 0.5, 0.55)
@@ -10,50 +12,23 @@ func _ready() -> void:
     _build_body()
 
 func _build_body() -> void:
+    var species := "Human"
+    match dialogue_id:
+        "cael": species = "Felid"
+        "sera": species = "Conglomerate"
+        "novice": species = "Glauxi"
+        _:
+            species = "Human"
+
     var shape := CapsuleShape3D.new()
-    shape.radius = 0.46
-    shape.height = 1.8
+    shape.radius = 0.43 if species != "Conglomerate" else 0.55
+    shape.height = 1.95 if species != "Glauxi" else 2.05
     var collision := CollisionShape3D.new()
     collision.shape = shape
-    collision.position.y = 0.9
+    collision.position.y = 0.98
     add_child(collision)
 
-    # Deliberately simple, faceted figures: robes first, anatomy second.
-    var robe_mesh := CylinderMesh.new()
-    robe_mesh.top_radius = 0.31
-    robe_mesh.bottom_radius = 0.49
-    robe_mesh.height = 1.55
-    robe_mesh.radial_segments = 8
-    var robe_mat := StandardMaterial3D.new()
-    robe_mat.albedo_color = body_color
-    robe_mat.roughness = 0.96
-    robe_mesh.material = robe_mat
-    var robe := MeshInstance3D.new()
-    robe.mesh = robe_mesh
-    robe.position.y = 0.82
-    add_child(robe)
-
-    var shoulder_mesh := BoxMesh.new()
-    shoulder_mesh.size = Vector3(0.82, 0.18, 0.34)
-    var shoulder := MeshInstance3D.new()
-    shoulder.mesh = shoulder_mesh
-    shoulder.position = Vector3(0, 1.48, 0)
-    shoulder.material_override = robe_mat
-    add_child(shoulder)
-
-    var skin_mat := StandardMaterial3D.new()
-    skin_mat.albedo_color = body_color.lightened(0.22)
-    skin_mat.roughness = 0.9
-    var head_mesh := SphereMesh.new()
-    head_mesh.radius = 0.32
-    head_mesh.height = 0.64
-    head_mesh.radial_segments = 8
-    head_mesh.rings = 4
-    head_mesh.material = skin_mat
-    var head := MeshInstance3D.new()
-    head.mesh = head_mesh
-    head.position.y = 1.92
-    add_child(head)
+    VISUALS.build(self, species, body_color, dialogue_id)
 
 func get_interaction_text() -> String:
     return "Speak with %s" % display_name
