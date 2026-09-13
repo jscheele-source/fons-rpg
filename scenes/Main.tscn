@@ -5,7 +5,7 @@
 [ext_resource type="Script" path="res://scripts/hud.gd" id="3_hud"]
 [ext_resource type="Script" path="res://scripts/monastery_interior_v2.gd" id="4_interior"]
 [ext_resource type="Script" path="res://scripts/monastery_gameplay.gd" id="5_monastery_gameplay"]
-[ext_resource type="Script" path="res://scripts/visual_world_pass.gd" id="6_visual_world"]
+[ext_resource type="Script" path="res://scripts/visual_world_pass_v2.gd" id="6_visual_world"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape_player"]
 radius = 0.45
