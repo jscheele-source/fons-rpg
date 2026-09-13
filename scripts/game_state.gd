@@ -5,7 +5,7 @@ signal skill_increased(skill_name: String, new_level: int)
 signal quest_updated(quest_id: String)
 signal message_requested(text: String)
 
-var attributes := {
+const BASE_ATTRIBUTES := {
     "Strength": 40,
     "Endurance": 40,
     "Agility": 40,
@@ -14,7 +14,7 @@ var attributes := {
     "Presence": 40,
 }
 
-var skills := {
+const BASE_SKILLS := {
     "Blade": {"level": 15, "xp": 0.0},
     "Athletics": {"level": 10, "xp": 0.0},
     "Meditation": {"level": 10, "xp": 0.0},
@@ -23,6 +23,16 @@ var skills := {
     "Technology": {"level": 10, "xp": 0.0},
     "Lore": {"level": 10, "xp": 0.0},
 }
+
+var player_profile := {
+    "name": "Initiate",
+    "species": "Human",
+    "background": "Pilgrim",
+    "answers": [],
+}
+
+var attributes: Dictionary = BASE_ATTRIBUTES.duplicate(true)
+var skills: Dictionary = BASE_SKILLS.duplicate(true)
 
 var max_health := 100.0
 var health := 100.0
@@ -61,6 +71,51 @@ func reset_quests() -> void:
             ],
         }
     }
+
+func new_game(profile_data: Dictionary) -> void:
+    player_profile = {
+        "name": str(profile_data.get("name", "Initiate")),
+        "species": str(profile_data.get("species", "Human")),
+        "background": str(profile_data.get("background", "Pilgrim")),
+        "answers": profile_data.get("answers", []).duplicate(true),
+    }
+    attributes = BASE_ATTRIBUTES.duplicate(true)
+    skills = BASE_SKILLS.duplicate(true)
+    max_health = 100.0
+    health = 100.0
+    max_charge = 100.0
+    charge = 70.0
+    credits = 25
+    inventory = {
+        "traveler_ration": {"name": "Traveler's Ration", "count": 2, "description": "Dense monastery travel food."},
+    }
+    factions = {"Flamen": 0, "Piri Riis": 0, "Independent": 0}
+    discovered_locations = ["Outer Courtyard"]
+    world_flags = {"new_arrival": true}
+    reset_quests()
+    _apply_background(player_profile["background"])
+    state_changed.emit()
+
+func _apply_background(background: String) -> void:
+    match background:
+        "Monastery Ward":
+            skills["Meditation"]["level"] += 5
+            skills["Lore"]["level"] += 5
+        "Provincial Guard":
+            skills["Blade"]["level"] += 5
+            skills["Athletics"]["level"] += 5
+        "Datapad Scholar":
+            skills["Lore"]["level"] += 5
+            skills["Technology"]["level"] += 5
+        "Shuttlehand":
+            skills["Technology"]["level"] += 5
+            skills["Athletics"]["level"] += 5
+        "Pilgrim":
+            skills["Meditation"]["level"] += 5
+            skills["Speechcraft"]["level"] += 5
+        "Drifter":
+            skills["Athletics"]["level"] += 5
+            skills["Speechcraft"]["level"] += 5
 
 func damage(amount: float) -> void:
     health = clamp(health - amount, 0.0, max_health)
@@ -160,6 +215,7 @@ func current_objective() -> String:
 
 func save_game(player: Node3D) -> void:
     var save_data := {
+        "player_profile": player_profile,
         "attributes": attributes,
         "skills": skills,
         "health": health,
@@ -186,6 +242,7 @@ func load_game(player: Node3D) -> void:
     if typeof(data) != TYPE_DICTIONARY:
         message_requested.emit("Save file could not be read.")
         return
+    player_profile = data.get("player_profile", player_profile)
     attributes = data.get("attributes", attributes)
     skills = data.get("skills", skills)
     health = float(data.get("health", health))
