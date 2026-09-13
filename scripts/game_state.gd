@@ -57,8 +57,8 @@ var world_flags: Dictionary = {}
 func _ready() -> void:
     reset_quests()
 
-func reset_quests() -> void:
-    quests = {
+func _quest_definitions() -> Dictionary:
+    return {
         "first_steps": {
             "name": "First Steps on Iustitia",
             "state": "not_started",
@@ -82,7 +82,38 @@ func reset_quests() -> void:
                 "Decide who should receive the Resonator Core.",
             ],
         },
+        "novice_quarters": {
+            "name": "A Place Among the Novices",
+            "state": "not_started",
+            "stage": 0,
+            "resolution": "",
+            "objectives": [
+                "Enter the monastic dwelling and find the bed assigned to you.",
+                "Rest in your assigned novice cell.",
+            ],
+        },
+        "measure_of_fire": {
+            "name": "The Measure of Fire",
+            "state": "not_started",
+            "stage": 0,
+            "resolution": "",
+            "objectives": [
+                "Speak with Elder Davian in the meditation court.",
+                "Use the low meditation stone to gather Pneuma.",
+                "Kindle the practice ember.",
+                "Return to Elder Davian.",
+            ],
+        },
     }
+
+func reset_quests() -> void:
+    quests = _quest_definitions()
+
+func _ensure_quest_definitions() -> void:
+    var definitions: Dictionary = _quest_definitions()
+    for quest_id in definitions.keys():
+        if not quests.has(quest_id):
+            quests[quest_id] = definitions[quest_id].duplicate(true)
 
 func new_game(profile_data: Dictionary) -> void:
     player_profile = {
@@ -109,6 +140,7 @@ func new_game(profile_data: Dictionary) -> void:
         "rang_processional_bell": false,
         "varro_addressed_bell": false,
         "varro_met": false,
+        "interior_admitted": false,
     }
     reset_quests()
     quests["first_steps"]["state"] = "active"
@@ -228,6 +260,9 @@ func add_skill_xp(skill_name: String, amount: float) -> void:
         message_requested.emit("%s increased to %d." % [skill_name, level + 1])
         state_changed.emit()
 
+func quest_is_completed(quest_id: String) -> bool:
+    return quests.has(quest_id) and str(quests[quest_id].get("state", "")) == "completed"
+
 func start_quest(quest_id: String) -> void:
     if not quests.has(quest_id):
         return
@@ -264,12 +299,34 @@ func complete_first_steps() -> void:
     quests["first_steps"]["state"] = "completed"
     quests["first_steps"]["resolution"] = str(quests["resonator_core"].get("resolution", ""))
     factions["Flamen"] = int(factions.get("Flamen", 0)) + 2
+    world_flags["interior_admitted"] = true
     quest_updated.emit("first_steps")
     message_requested.emit("Quest completed: First Steps on Iustitia")
+
+    if quests.has("novice_quarters") and quests["novice_quarters"]["state"] == "not_started":
+        quests["novice_quarters"]["state"] = "active"
+        quests["novice_quarters"]["stage"] = 0
+        quest_updated.emit("novice_quarters")
+        message_requested.emit("Quest started: A Place Among the Novices")
+    state_changed.emit()
+
+func complete_measure_of_fire() -> void:
+    if not quests.has("measure_of_fire") or quests["measure_of_fire"]["state"] == "completed":
+        return
+    quests["measure_of_fire"]["state"] = "completed"
+    quests["measure_of_fire"]["resolution"] = "trained"
+    max_charge += 10.0
+    charge = min(max_charge, charge + 10.0)
+    factions["Flamen"] = int(factions.get("Flamen", 0)) + 1
+    world_flags["first_flame_lesson"] = true
+    add_skill_xp("Meditation", 2.0)
+    add_skill_xp("Flamecraft", 2.0)
+    quest_updated.emit("measure_of_fire")
+    message_requested.emit("Quest completed: The Measure of Fire. Maximum Inner Flame increased by 10.")
     state_changed.emit()
 
 func current_objective() -> String:
-    for quest_id in ["first_steps", "resonator_core"]:
+    for quest_id in ["first_steps", "resonator_core", "novice_quarters", "measure_of_fire"]:
         if not quests.has(quest_id):
             continue
         var q: Dictionary = quests[quest_id]
@@ -277,6 +334,8 @@ func current_objective() -> String:
             var stage := int(q["stage"])
             if stage >= 0 and stage < q["objectives"].size():
                 return q["objectives"][stage]
+    if quest_is_completed("first_steps"):
+        return "Explore the monastic dwelling."
     return "Explore the Outer Courtyard."
 
 func save_game(player: Node3D) -> void:
@@ -284,7 +343,9 @@ func save_game(player: Node3D) -> void:
         "player_profile": player_profile,
         "attributes": attributes,
         "skills": skills,
+        "max_health": max_health,
         "health": health,
+        "max_charge": max_charge,
         "charge": charge,
         "credits": credits,
         "inventory": inventory,
@@ -311,7 +372,9 @@ func load_game(player: Node3D) -> void:
     player_profile = data.get("player_profile", player_profile)
     attributes = data.get("attributes", attributes)
     skills = data.get("skills", skills)
+    max_health = float(data.get("max_health", max_health))
     health = float(data.get("health", health))
+    max_charge = float(data.get("max_charge", max_charge))
     charge = float(data.get("charge", charge))
     credits = int(data.get("credits", credits))
     inventory = data.get("inventory", inventory)
@@ -319,6 +382,14 @@ func load_game(player: Node3D) -> void:
     quests = data.get("quests", quests)
     world_flags = data.get("flags", world_flags)
     discovered_locations.assign(data.get("discovered_locations", discovered_locations))
+    _ensure_quest_definitions()
+
+    if quest_is_completed("first_steps"):
+        world_flags["interior_admitted"] = true
+        if quests["novice_quarters"]["state"] == "not_started":
+            quests["novice_quarters"]["state"] = "active"
+            quests["novice_quarters"]["stage"] = 0
+
     var p = data.get("player_position", [0, 1.25, 13])
     player.global_position = Vector3(float(p[0]), float(p[1]), float(p[2]))
     player.rotation.y = float(data.get("player_rotation_y", player.rotation.y))
