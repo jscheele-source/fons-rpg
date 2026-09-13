@@ -1,9 +1,10 @@
-[gd_scene load_steps=8 format=3]
+[gd_scene load_steps=9 format=3]
 
 [ext_resource type="Script" path="res://scripts/world.gd" id="1_world"]
 [ext_resource type="Script" path="res://scripts/player.gd" id="2_player"]
 [ext_resource type="Script" path="res://scripts/hud.gd" id="3_hud"]
 [ext_resource type="Script" path="res://scripts/monastery_interior_v2.gd" id="4_interior"]
+[ext_resource type="Script" path="res://scripts/monastery_gameplay.gd" id="5_monastery_gameplay"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape_player"]
 radius = 0.45
@@ -58,6 +59,9 @@ enabled = true
 
 [node name="MonasteryInterior" type="Node3D" parent="."]
 script = ExtResource("4_interior")
+
+[node name="MonasteryGameplay" type="Node3D" parent="."]
+script = ExtResource("5_monastery_gameplay")
 
 [node name="HUD" type="CanvasLayer" parent="."]
 script = ExtResource("3_hud")
