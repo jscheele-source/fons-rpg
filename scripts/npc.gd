@@ -11,32 +11,48 @@ func _ready() -> void:
 
 func _build_body() -> void:
     var shape := CapsuleShape3D.new()
-    shape.radius = 0.45
-    shape.height = 1.75
+    shape.radius = 0.46
+    shape.height = 1.8
     var collision := CollisionShape3D.new()
     collision.shape = shape
     collision.position.y = 0.9
     add_child(collision)
 
-    var mesh := CapsuleMesh.new()
-    mesh.radius = 0.45
-    mesh.height = 1.75
-    var mat := StandardMaterial3D.new()
-    mat.albedo_color = body_color
-    mat.roughness = 0.8
-    mesh.material = mat
-    var visual := MeshInstance3D.new()
-    visual.mesh = mesh
-    visual.position.y = 0.9
-    add_child(visual)
+    # Deliberately simple, faceted figures: robes first, anatomy second.
+    var robe_mesh := CylinderMesh.new()
+    robe_mesh.top_radius = 0.31
+    robe_mesh.bottom_radius = 0.49
+    robe_mesh.height = 1.55
+    robe_mesh.radial_segments = 8
+    var robe_mat := StandardMaterial3D.new()
+    robe_mat.albedo_color = body_color
+    robe_mat.roughness = 0.96
+    robe_mesh.material = robe_mat
+    var robe := MeshInstance3D.new()
+    robe.mesh = robe_mesh
+    robe.position.y = 0.82
+    add_child(robe)
 
+    var shoulder_mesh := BoxMesh.new()
+    shoulder_mesh.size = Vector3(0.82, 0.18, 0.34)
+    var shoulder := MeshInstance3D.new()
+    shoulder.mesh = shoulder_mesh
+    shoulder.position = Vector3(0, 1.48, 0)
+    shoulder.material_override = robe_mat
+    add_child(shoulder)
+
+    var skin_mat := StandardMaterial3D.new()
+    skin_mat.albedo_color = body_color.lightened(0.22)
+    skin_mat.roughness = 0.9
     var head_mesh := SphereMesh.new()
-    head_mesh.radius = 0.34
-    head_mesh.height = 0.68
-    head_mesh.material = mat
+    head_mesh.radius = 0.32
+    head_mesh.height = 0.64
+    head_mesh.radial_segments = 8
+    head_mesh.rings = 4
+    head_mesh.material = skin_mat
     var head := MeshInstance3D.new()
     head.mesh = head_mesh
-    head.position.y = 2.0
+    head.position.y = 1.92
     add_child(head)
 
 func get_interaction_text() -> String:
@@ -90,8 +106,8 @@ func choose(action: String) -> void:
         "sera_offer": current_page = "sera_offer"
         "sera_give_core":
             if GameState.remove_item("resonator_core", 1):
-                GameState.complete_quest("resonator_core", "piri_riis")
-                GameState.change_reputation("Piri Riis", 5)
+                GameState.complete_quest("resonator_core", "independent_research")
+                GameState.change_reputation("Independent", 5)
                 GameState.add_credits(65)
                 current_page = "sera_thanks"
         "novice_lucretia": current_page = "novice_lucretia"
@@ -147,8 +163,8 @@ func _varro_dialogue() -> Dictionary:
         var line := "Cael says the matter is finished."
         if resolution == "flamen":
             line = "You returned the core to Cael. Sensible. Do not mistake my approval for certainty."
-        elif resolution == "piri_riis":
-            line = "You gave the core to Nemm. Cael has filed an objection. A written objection here can outlive the person who made it."
+        elif resolution == "independent_research":
+            line = "You gave the core to Nemm's research office. Cael has filed an objection. A written objection here can outlive the person who made it."
         return {
             "speaker": display_name,
             "text": line,
@@ -187,8 +203,8 @@ func _cael_dialogue() -> Dictionary:
     if q["state"] == "completed":
         var resolution := str(q["resolution"])
         var text := "You have done enough for this courtyard today."
-        if resolution == "piri_riis":
-            text = "Nemm has the core. I objected. That is all I will say while the objection is fresh."
+        if resolution == "independent_research":
+            text = "Nemm's office has the core. I objected. That is all I will say while the objection is fresh."
         elif resolution == "flamen":
             text = "The core is secure. Secure is not the same as understood."
         return {"speaker": display_name, "text": text, "choices": [{"text": "Goodbye.", "action": "close"}]}
@@ -217,24 +233,24 @@ func _sera_dialogue() -> Dictionary:
     if q["state"] == "active" and GameState.has_item("resonator_core"):
         return {
             "speaker": display_name,
-            "text": "You're carrying the resonator. Cael will want it inside monastery walls. I would rather it spend a few days somewhere with windows.",
+            "text": "You're carrying the resonator. Cael will want it behind monastery doors. My contract says I am supposed to measure anything the monastery has not decided to call holy yet.",
             "choices": [
                 {"text": "What would you do with it?", "action": "sera_offer"},
-                {"text": "Give Sera the core.", "action": "sera_give_core"},
+                {"text": "Give Nemm the core.", "action": "sera_give_core"},
                 {"text": "Not yet.", "action": "close"},
             ]
         }
     if current_page == "sera_offer":
-        return {"speaker": display_name, "text": "Measure it. Copy the readings. Let everyone argue from the same numbers for once. I will also pay you better than the monastery will.", "choices": [{"text": "Give her the core.", "action": "sera_give_core"}, {"text": "Back.", "action": "back"}]}
+        return {"speaker": display_name, "text": "Measure it. Copy the readings. Send one copy to the monastery and one off-world before either office has time to lose it. Bago pays for redundancy. I will also pay you better than Cael will.", "choices": [{"text": "Give Nemm the core.", "action": "sera_give_core"}, {"text": "Back.", "action": "back"}]}
     if current_page == "sera_lore":
-        return {"speaker": display_name, "text": "Research. Nemm's consortium pays its fees and keeps its own shrines. Taahir's officers would rather we kept our distance. Both can call themselves Piri Riis without asking the other.", "choices": [{"text": "Back.", "action": "back"}]}
+        return {"speaker": display_name, "text": "Winne Bago's people call this a research lease. The monastery calls it temporary accommodation. I have learned not to ask which wording appears on the same document.", "choices": [{"text": "Back.", "action": "back"}]}
     if current_page == "sera_thanks":
-        return {"speaker": display_name, "text": "Good. Whatever it proves, more than one institution will have to live with the answer.", "choices": [{"text": "Goodbye.", "action": "close"}]}
+        return {"speaker": display_name, "text": "Good. Whatever it proves, there will be two copies of the numbers before anyone discovers a reason to misplace them.", "choices": [{"text": "Goodbye.", "action": "close"}]}
     if q["state"] == "completed" and q["resolution"] == "flamen":
         return {"speaker": display_name, "text": "You gave the core to the monastery. Sensible. Safe. Those words overlap more often than I like.", "choices": [{"text": "Goodbye.", "action": "close"}]}
     return {
         "speaker": display_name,
-        "text": "Sera glances at your novice papers, then at you.",
+        "text": "Nemm glances at your novice papers, then at the old walls behind you.",
         "choices": [
             {"text": "What brings you to Iustitia?", "action": "sera_lore"},
             {"text": "Goodbye.", "action": "close"},
@@ -247,7 +263,7 @@ func _novice_dialogue() -> Dictionary:
     if current_page == "novice_bryleigh":
         return {"speaker": display_name, "text": "There was a librarian by that name. There are three versions of what happened and at least five reasons not to ask in the library.", "choices": [{"text": "Back.", "action": "back"}]}
     if current_page == "novice_war":
-        return {"speaker": display_name, "text": "The quartermaster calls the new crates training stock. The seals on them are not from a training yard.", "choices": [{"text": "Back.", "action": "back"}]}
+        return {"speaker": display_name, "text": "The quartermaster calls the new crates training stock. Yesterday somebody asked whether they were for Fanum. The quartermaster told him never to ask that in the courtyard again.", "choices": [{"text": "Back.", "action": "back"}]}
     if current_page == "novice_bell":
         return {"speaker": display_name, "text": "That was you? I wondered. No, I don't know what it is for. I only know everyone else knew not to touch it.", "choices": [{"text": "Back.", "action": "back"}]}
 
