@@ -1,6 +1,8 @@
 extends StaticBody3D
 class_name DavianNPC
 
+const VISUALS = preload("res://scripts/npc_visuals.gd")
+
 var display_name := "Elder Davian"
 var body_color := Color(0.34, 0.30, 0.24)
 var current_page := "start"
@@ -10,48 +12,13 @@ func _ready() -> void:
 
 func _build_body() -> void:
     var shape := CapsuleShape3D.new()
-    shape.radius = 0.46
-    shape.height = 1.8
+    shape.radius = 0.43
+    shape.height = 1.95
     var collision := CollisionShape3D.new()
     collision.shape = shape
-    collision.position.y = 0.9
+    collision.position.y = 0.98
     add_child(collision)
-
-    var robe_mesh := CylinderMesh.new()
-    robe_mesh.top_radius = 0.30
-    robe_mesh.bottom_radius = 0.49
-    robe_mesh.height = 1.55
-    robe_mesh.radial_segments = 8
-    var robe_mat := StandardMaterial3D.new()
-    robe_mat.albedo_color = body_color
-    robe_mat.roughness = 0.97
-    robe_mesh.material = robe_mat
-    var robe := MeshInstance3D.new()
-    robe.mesh = robe_mesh
-    robe.position.y = 0.82
-    add_child(robe)
-
-    var shoulder_mesh := BoxMesh.new()
-    shoulder_mesh.size = Vector3(0.82, 0.18, 0.34)
-    var shoulder := MeshInstance3D.new()
-    shoulder.mesh = shoulder_mesh
-    shoulder.position = Vector3(0, 1.48, 0)
-    shoulder.material_override = robe_mat
-    add_child(shoulder)
-
-    var skin_mat := StandardMaterial3D.new()
-    skin_mat.albedo_color = Color(0.33, 0.27, 0.22)
-    skin_mat.roughness = 0.92
-    var head_mesh := SphereMesh.new()
-    head_mesh.radius = 0.31
-    head_mesh.height = 0.62
-    head_mesh.radial_segments = 8
-    head_mesh.rings = 4
-    head_mesh.material = skin_mat
-    var head := MeshInstance3D.new()
-    head.mesh = head_mesh
-    head.position.y = 1.92
-    add_child(head)
+    VISUALS.build(self, "Human", body_color, "davian")
 
 func get_interaction_text() -> String:
     return "Speak with %s" % display_name
