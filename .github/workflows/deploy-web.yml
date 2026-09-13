@@ -12,6 +12,9 @@ concurrency:
   group: web-deploy
   cancel-in-progress: true
 
+env:
+  GODOT_VERSION: 4.3
+
 jobs:
   build-and-deploy:
     runs-on: ubuntu-24.04
@@ -21,17 +24,28 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Validate Godot project
+      - name: Set up Godot CI environment
         shell: bash
         run: |
-          HOME=/root godot --version
-          HOME=/root godot --headless --path . --editor --quit
+          mkdir -v -p ~/.local/share/godot/export_templates/
+          mkdir -v -p ~/.config/
+          if [ -d /root/.config/godot ]; then
+            mv /root/.config/godot ~/.config/godot
+          fi
+          mv /root/.local/share/godot/export_templates/${GODOT_VERSION}.stable ~/.local/share/godot/export_templates/${GODOT_VERSION}.stable
+          godot --version
+          find ~/.local/share/godot/export_templates/${GODOT_VERSION}.stable -maxdepth 1 -type f -print
+
+      - name: Validate Godot project
+        shell: bash
+        run: godot --headless --verbose --path . --editor --quit
 
       - name: Export browser build
         shell: bash
         run: |
-          mkdir -p build/web
-          HOME=/root godot --headless --verbose --path . --export-release "Web" build/web/index.html
+          mkdir -v -p build/web
+          EXPORT_DIR="$(readlink -f build)"
+          godot --headless --verbose --path . --export-release "Web" "$EXPORT_DIR/web/index.html"
           touch build/web/.nojekyll
 
       - name: Publish browser build
