@@ -10,10 +10,15 @@ height = 1.8
 
 [sub_resource type="Environment" id="Environment_main"]
 background_mode = 1
-background_color = Color(0.09, 0.075, 0.11, 1)
+background_color = Color(0.16, 0.145, 0.13, 1)
 ambient_light_source = 3
-ambient_light_color = Color(0.48, 0.39, 0.56, 1)
-ambient_light_energy = 0.9
+ambient_light_color = Color(0.48, 0.43, 0.36, 1)
+ambient_light_energy = 0.58
+fog_enabled = true
+fog_light_color = Color(0.39, 0.36, 0.31, 1)
+fog_light_energy = 0.72
+fog_density = 0.018
+fog_sky_affect = 0.78
 
 [node name="Main" type="Node3D"]
 script = ExtResource("1_world")
@@ -23,7 +28,8 @@ environment = SubResource("Environment_main")
 
 [node name="FonsLight" type="DirectionalLight3D" parent="."]
 rotation_degrees = Vector3(-48, -28, 0)
-light_energy = 1.35
+light_color = Color(0.86, 0.72, 0.54, 1)
+light_energy = 1.05
 shadow_enabled = true
 
 [node name="Player" type="CharacterBody3D" parent="."]
@@ -37,7 +43,7 @@ shape = SubResource("CapsuleShape_player")
 [node name="Camera3D" type="Camera3D" parent="Player"]
 position = Vector3(0, 1.55, 0)
 current = true
-fov = 75.0
+fov = 72.0
 
 [node name="InteractRay" type="RayCast3D" parent="Player/Camera3D"]
 target_position = Vector3(0, 0, -4)
