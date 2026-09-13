@@ -36,6 +36,11 @@ const BACKGROUND_TEXT := {
     "Drifter": "You learned to read strangers quickly and keep moving when a place became dangerous. +5 Athletics, +5 Speechcraft.",
 }
 
+const GOLD := Color(0.88, 0.77, 0.56)
+const GOLD_BRIGHT := Color(0.98, 0.88, 0.66)
+const BROWN := Color(0.10, 0.075, 0.050, 0.96)
+const BORDER := Color(0.46, 0.32, 0.17)
+
 var content: VBoxContainer
 var name_edit: LineEdit
 var species_option: OptionButton
@@ -49,18 +54,54 @@ func _ready() -> void:
     _build_frame()
     _show_title()
 
+func _panel_style(bg: Color) -> StyleBoxFlat:
+    var style := StyleBoxFlat.new()
+    style.bg_color = bg
+    style.border_color = BORDER
+    style.border_width_left = 2
+    style.border_width_top = 2
+    style.border_width_right = 2
+    style.border_width_bottom = 2
+    style.content_margin_left = 14
+    style.content_margin_right = 14
+    style.content_margin_top = 10
+    style.content_margin_bottom = 10
+    return style
+
+func _style_input(control: Control) -> void:
+    if control is LineEdit:
+        control.add_theme_color_override("font_color", GOLD)
+        control.add_theme_color_override("font_placeholder_color", Color(0.55, 0.48, 0.38))
+        control.add_theme_stylebox_override("normal", _panel_style(Color(0.065, 0.052, 0.040, 0.98)))
+        control.add_theme_stylebox_override("focus", _panel_style(Color(0.12, 0.085, 0.05, 0.98)))
+    elif control is OptionButton:
+        control.add_theme_color_override("font_color", GOLD)
+        control.add_theme_color_override("font_hover_color", GOLD_BRIGHT)
+        control.add_theme_stylebox_override("normal", _panel_style(Color(0.065, 0.052, 0.040, 0.98)))
+        control.add_theme_stylebox_override("hover", _panel_style(Color(0.12, 0.085, 0.05, 0.98)))
+        control.add_theme_stylebox_override("pressed", _panel_style(Color(0.15, 0.10, 0.055, 0.98)))
+
 func _build_frame() -> void:
     var bg := ColorRect.new()
-    bg.color = Color(0.035, 0.03, 0.045, 1.0)
+    bg.color = Color(0.035, 0.031, 0.026, 1.0)
     bg.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
     add_child(bg)
 
-    var shade := ColorRect.new()
-    shade.color = Color(0.12, 0.08, 0.12, 0.42)
-    shade.anchor_left = 0.18
-    shade.anchor_right = 0.82
-    shade.anchor_top = 0.0
-    shade.anchor_bottom = 1.0
+    # Large flat bands mimic an old painted menu backdrop without importing art assets.
+    var haze := ColorRect.new()
+    haze.color = Color(0.18, 0.135, 0.085, 0.20)
+    haze.anchor_left = 0.0
+    haze.anchor_right = 1.0
+    haze.anchor_top = 0.18
+    haze.anchor_bottom = 0.82
+    add_child(haze)
+
+    var shade := PanelContainer.new()
+    shade.anchor_left = 0.17
+    shade.anchor_right = 0.83
+    shade.anchor_top = 0.035
+    shade.anchor_bottom = 0.965
+    shade.add_theme_stylebox_override("panel", _panel_style(Color(0.055, 0.043, 0.032, 0.92)))
     add_child(shade)
 
     content = VBoxContainer.new()
@@ -85,7 +126,10 @@ func _heading(text: String, size: int = 36) -> Label:
     label.text = text
     label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
     label.add_theme_font_size_override("font_size", size)
-    label.add_theme_color_override("font_color", Color(0.88, 0.80, 0.65))
+    label.add_theme_color_override("font_color", GOLD_BRIGHT)
+    label.add_theme_color_override("font_shadow_color", Color(0, 0, 0, 0.85))
+    label.add_theme_constant_override("shadow_offset_x", 2)
+    label.add_theme_constant_override("shadow_offset_y", 2)
     return label
 
 func _body(text: String) -> Label:
@@ -95,41 +139,58 @@ func _body(text: String) -> Label:
     label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
     label.custom_minimum_size = Vector2(620, 0)
     label.add_theme_font_size_override("font_size", 17)
-    label.add_theme_color_override("font_color", Color(0.80, 0.78, 0.76))
+    label.add_theme_color_override("font_color", GOLD)
     return label
 
 func _button(text: String, callback: Callable) -> Button:
     var button := Button.new()
     button.text = text
-    button.custom_minimum_size = Vector2(340, 48)
+    button.custom_minimum_size = Vector2(340, 46)
     button.add_theme_font_size_override("font_size", 18)
+    button.add_theme_color_override("font_color", GOLD)
+    button.add_theme_color_override("font_hover_color", GOLD_BRIGHT)
+    button.add_theme_stylebox_override("normal", _panel_style(BROWN))
+    button.add_theme_stylebox_override("hover", _panel_style(Color(0.17, 0.115, 0.060, 0.98)))
+    button.add_theme_stylebox_override("pressed", _panel_style(Color(0.22, 0.145, 0.070, 0.98)))
+    button.add_theme_stylebox_override("focus", _panel_style(Color(0.17, 0.115, 0.060, 0.98)))
     button.pressed.connect(callback)
     return button
 
+func _rule() -> ColorRect:
+    var rule := ColorRect.new()
+    rule.color = BORDER
+    rule.custom_minimum_size = Vector2(420, 2)
+    return rule
+
 func _show_title() -> void:
     _clear()
-    content.add_child(_heading("FONS", 58))
-    content.add_child(_heading("NEW WAYS", 28))
+    content.add_child(_heading("FONS", 60))
+    content.add_child(_heading("NEW WAYS", 27))
+    content.add_child(_rule())
     content.add_child(_body("A science-fantasy role-playing game"))
-    var spacer := Control.new(); spacer.custom_minimum_size.y = 28; content.add_child(spacer)
+    var spacer := Control.new()
+    spacer.custom_minimum_size.y = 20
+    content.add_child(spacer)
     content.add_child(_button("NEW GAME", _show_character_creation))
     var continue_button := _button("CONTINUE", _continue_game)
     continue_button.disabled = not FileAccess.file_exists("user://fons_save.json")
     content.add_child(continue_button)
     content.add_child(_button("ABOUT THIS BUILD", _show_about))
-    var version := _body("Prototype 0.3 — First Steps")
+    var version := _body("Prototype 0.4 — Ash & Stone")
     version.add_theme_font_size_override("font_size", 13)
     content.add_child(version)
 
 func _show_about() -> void:
     _clear()
     content.add_child(_heading("THE NEW WAYS", 36))
+    content.add_child(_rule())
     content.add_child(_body("The Flamen order, diminished for generations, is recruiting again. Rumors of miracles, heresy, war, and an Anointed woman named Lucretia have reached worlds far beyond Origo.\n\nYou have answered the summons to Iustitia.\n\nThis is an evolving prototype. The world will grow around the same saveable RPG foundation as development continues."))
     content.add_child(_button("RETURN", _show_title))
 
 func _show_character_creation() -> void:
     _clear()
     content.add_child(_heading("REGISTRY OF INITIATES", 32))
+    content.add_child(_rule())
     content.add_child(_body("The clerk does not look up when you approach. A datapad rests beside a roll of old paper covered in earlier names."))
 
     var name_label := _body("Name")
@@ -139,6 +200,7 @@ func _show_character_creation() -> void:
     name_edit.placeholder_text = "Enter your name"
     name_edit.text = "Initiate"
     name_edit.custom_minimum_size = Vector2(540, 42)
+    _style_input(name_edit)
     content.add_child(name_edit)
 
     var species_label := _body("Species")
@@ -148,6 +210,7 @@ func _show_character_creation() -> void:
     for species in SPECIES:
         species_option.add_item(species)
     species_option.custom_minimum_size = Vector2(540, 42)
+    _style_input(species_option)
     species_option.item_selected.connect(_update_species_text)
     content.add_child(species_option)
 
@@ -162,6 +225,7 @@ func _show_character_creation() -> void:
     for background in BACKGROUNDS:
         background_option.add_item(background)
     background_option.custom_minimum_size = Vector2(540, 42)
+    _style_input(background_option)
     background_option.item_selected.connect(_update_background_text)
     content.add_child(background_option)
 
@@ -193,10 +257,11 @@ func _record_basic_profile() -> void:
 func _show_question() -> void:
     _clear()
     content.add_child(_heading("A QUESTION", 32))
+    content.add_child(_rule())
     content.add_child(_body("The next official is older. There is no datapad before them. They study you for a long moment, then ask:"))
     var question := _body("“If justice and peace cannot both be preserved, which have you been taught to keep?”")
     question.add_theme_font_size_override("font_size", 23)
-    question.add_theme_color_override("font_color", Color(0.92, 0.86, 0.74))
+    question.add_theme_color_override("font_color", GOLD_BRIGHT)
     content.add_child(question)
     content.add_child(_button("Justice.", func(): _answer_question("Justice")))
     content.add_child(_button("Peace.", func(): _answer_question("Peace")))
@@ -210,6 +275,7 @@ func _answer_question(answer: String) -> void:
 func _show_review() -> void:
     _clear()
     content.add_child(_heading("THE RECORD", 32))
+    content.add_child(_rule())
     content.add_child(_body("Name: %s\nSpecies: %s\nBackground: %s\n\nYour final answer is entered without comment." % [draft_profile["name"], draft_profile["species"], draft_profile["background"]]))
     content.add_child(_button("ACCEPT THE SUMMONS", _begin_new_game))
     content.add_child(_button("START OVER", _show_character_creation))
@@ -221,6 +287,7 @@ func _begin_new_game() -> void:
 func _show_arrival() -> void:
     _clear()
     content.add_child(_heading("IUSTITIA", 40))
+    content.add_child(_rule())
     content.add_child(_body("For most of the descent there is nothing beneath the shuttle but cloud.\n\nThen the monastery appears. Black peaks rise through the storm like broken teeth. Ancient walls cling to stone that should not hold them. A landing beacon flashes beside a courtyard older than the language on your travel papers.\n\nOn final approach, the conversations around you stop one by one. Nothing outside has changed except the cloud. You cannot tell whether the silence is habit, prayer, or nerves.\n\nThe landing gear strikes stone."))
     content.add_child(_button("DISEMBARK", _enter_iustitia))
 
