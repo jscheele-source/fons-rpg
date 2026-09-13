@@ -117,7 +117,7 @@ func _show_title() -> void:
     continue_button.disabled = not FileAccess.file_exists("user://fons_save.json")
     content.add_child(continue_button)
     content.add_child(_button("ABOUT THIS BUILD", _show_about))
-    var version := _body("Prototype 0.2 — Iustitia initiation build")
+    var version := _body("Prototype 0.3 — First Steps")
     version.add_theme_font_size_override("font_size", 13)
     content.add_child(version)
 
@@ -154,10 +154,6 @@ func _show_character_creation() -> void:
     species_description = _body(SPECIES_TEXT[SPECIES[0]])
     species_description.add_theme_font_size_override("font_size", 14)
     content.add_child(species_description)
-
-    var species_note := _body("Species describes your body, not your culture, religion, politics, or personality.")
-    species_note.add_theme_font_size_override("font_size", 13)
-    content.add_child(species_note)
 
     var background_label := _body("Background")
     background_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
@@ -225,7 +221,7 @@ func _begin_new_game() -> void:
 func _show_arrival() -> void:
     _clear()
     content.add_child(_heading("IUSTITIA", 40))
-    content.add_child(_body("For most of the descent there is nothing beneath the shuttle but cloud.\n\nThen the monastery appears. Black peaks rise through the storm like broken teeth. Ancient walls cling to stone that should not hold them. A landing beacon flashes beside a courtyard older than the language on your travel papers.\n\nNo one aboard applauds.\n\nAcross the aisle, another initiate quietly removes their shoes before the shuttle has even touched down. Nobody explains why."))
+    content.add_child(_body("For most of the descent there is nothing beneath the shuttle but cloud.\n\nThen the monastery appears. Black peaks rise through the storm like broken teeth. Ancient walls cling to stone that should not hold them. A landing beacon flashes beside a courtyard older than the language on your travel papers.\n\nOn final approach, the conversations around you stop one by one. Nothing outside has changed except the cloud. You cannot tell whether the silence is habit, prayer, or nerves.\n\nThe landing gear strikes stone."))
     content.add_child(_button("DISEMBARK", _enter_iustitia))
 
 func _enter_iustitia() -> void:
