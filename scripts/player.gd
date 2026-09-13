@@ -15,7 +15,13 @@ var attack_cooldown := 0.0
 var athletics_timer := 0.0
 
 func _ready() -> void:
-    Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
+    # Web browsers only allow pointer-lock after an explicit user gesture.
+    # Starting visible lets the first click reliably enter the game.
+    if OS.has_feature("web"):
+        Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
+        hud.show_message("Click inside the game to begin. Esc releases the mouse.")
+    else:
+        Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
 
 func _unhandled_input(event: InputEvent) -> void:
     if event is InputEventKey and event.pressed and not event.echo:
@@ -41,14 +47,26 @@ func _unhandled_input(event: InputEvent) -> void:
                 GameState.save_game(self)
             KEY_F9:
                 GameState.load_game(self)
+
+    # In browsers, pointer lock must be requested from a click event.
+    # The first click enters the game; subsequent left clicks attack.
+    if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
+        if hud.has_modal_open():
+            return
+        if Input.mouse_mode != Input.MOUSE_MODE_CAPTURED:
+            Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
+            hud.show_message("Mouse captured. WASD to move, E to interact, Esc to release.")
+            get_viewport().set_input_as_handled()
+            return
+        attack()
+        return
+
     if hud.has_modal_open():
         return
     if event is InputEventMouseMotion and Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
         rotate_y(-event.relative.x * MOUSE_SENSITIVITY)
         pitch = clamp(pitch - event.relative.y * MOUSE_SENSITIVITY, deg_to_rad(-85), deg_to_rad(85))
         camera.rotation.x = pitch
-    elif event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
-        attack()
 
 func _physics_process(delta: float) -> void:
     attack_cooldown = max(attack_cooldown - delta, 0.0)
