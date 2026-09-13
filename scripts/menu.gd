@@ -1,6 +1,23 @@
 extends Control
 
-const SPECIES := ["Human", "Felid"]
+const SPECIES := [
+    "Human",
+    "Felid",
+    "Gruhanian",
+    "Conglomerate",
+    "Sargasson",
+    "Avian",
+]
+
+const SPECIES_TEXT := {
+    "Human": "Humans vary widely in build and origin. Their biology carries no unusual movement or sensory assumptions.",
+    "Felid": "Catlike people ranging from small and wiry to very large and powerful. Felids possess feline senses, claws, mobile ears, and expressive tails.",
+    "Gruhanian": "Large, slower-moving people with broad green heads, beaks, and yellow eyes. Gruhanians perceive a much wider range of color than most other peoples.",
+    "Conglomerate": "Large yellow-green reptilian people resembling bipedal komodo dragons. Their bodies are heavy, long-tailed, and naturally hunch-backed.",
+    "Sargasson": "Short, spindly people with elongated heads, eyestalks, and three legs: two forward and one rear. Their homeworld atmosphere is made from a dense gas unlike the air of most settled worlds.",
+    "Avian": "Tall, thin owl-like people protected by dense feathers. Most can glide or control a fall; only unusually powerful individuals are capable of sustained flight.",
+}
+
 const BACKGROUNDS := [
     "Monastery Ward",
     "Provincial Guard",
@@ -22,6 +39,7 @@ const BACKGROUND_TEXT := {
 var content: VBoxContainer
 var name_edit: LineEdit
 var species_option: OptionButton
+var species_description: Label
 var background_option: OptionButton
 var background_description: Label
 var draft_profile := {}
@@ -130,10 +148,15 @@ func _show_character_creation() -> void:
     for species in SPECIES:
         species_option.add_item(species)
     species_option.custom_minimum_size = Vector2(540, 42)
+    species_option.item_selected.connect(_update_species_text)
     content.add_child(species_option)
 
-    var species_note := _body("Species describes your body, not your culture, religion, politics, or personality. More playable species are being added as their designs are finalized.")
-    species_note.add_theme_font_size_override("font_size", 14)
+    species_description = _body(SPECIES_TEXT[SPECIES[0]])
+    species_description.add_theme_font_size_override("font_size", 14)
+    content.add_child(species_description)
+
+    var species_note := _body("Species describes your body, not your culture, religion, politics, or personality.")
+    species_note.add_theme_font_size_override("font_size", 13)
     content.add_child(species_note)
 
     var background_label := _body("Background")
@@ -152,6 +175,9 @@ func _show_character_creation() -> void:
 
     content.add_child(_button("CONTINUE", _record_basic_profile))
     content.add_child(_button("BACK", _show_title))
+
+func _update_species_text(index: int) -> void:
+    species_description.text = SPECIES_TEXT[SPECIES[index]]
 
 func _update_background_text(index: int) -> void:
     background_description.text = BACKGROUND_TEXT[BACKGROUNDS[index]]
