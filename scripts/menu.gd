@@ -6,7 +6,7 @@ const SPECIES := [
     "Gruhanian",
     "Conglomerate",
     "Sargasson",
-    "Avian",
+    "Glauxi",
 ]
 
 const SPECIES_TEXT := {
@@ -14,8 +14,8 @@ const SPECIES_TEXT := {
     "Felid": "Catlike people ranging from small and wiry to very large and powerful. Felids possess feline senses, claws, mobile ears, and expressive tails.",
     "Gruhanian": "Large, slower-moving people with broad green heads, beaks, and yellow eyes. Gruhanians perceive a much wider range of color than most other peoples.",
     "Conglomerate": "Large yellow-green reptilian people resembling bipedal komodo dragons. Their bodies are heavy, long-tailed, and naturally hunch-backed.",
-    "Sargasson": "Short, spindly people with elongated heads, eyestalks, and three legs: two forward and one rear. Their homeworld atmosphere is made from a dense gas unlike the air of most settled worlds.",
-    "Avian": "Tall, thin owl-like people protected by dense feathers. Most can glide or control a fall; only unusually powerful individuals are capable of sustained flight.",
+    "Sargasson": "Short, spindly people with elongated heads, eyestalks, and three legs: two forward and one rear. Off-world Sargassons normally breathe through a hip-mounted gas canister connected to a fitted mouthpiece.",
+    "Glauxi": "Tall, thin owl-like people covered in protective feathers. Their arms are wings. True flight requires exceptional strength and control, but Glauxi anatomy gives them a natural advantage when learning Flamen-assisted flight.",
 }
 
 const BACKGROUNDS := [
