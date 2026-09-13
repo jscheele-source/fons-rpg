@@ -91,9 +91,31 @@ func new_game(profile_data: Dictionary) -> void:
     }
     factions = {"Flamen": 0, "Piri Riis": 0, "Independent": 0}
     discovered_locations = ["Outer Courtyard"]
-    world_flags = {"new_arrival": true}
+    world_flags = {
+        "new_arrival": true,
+        "sargasson_inner_breath": false,
+    }
     reset_quests()
+    _apply_species_starting_gear(player_profile["species"])
     _apply_background(player_profile["background"])
+    state_changed.emit()
+
+func _apply_species_starting_gear(species: String) -> void:
+    if species == "Sargasson":
+        inventory["sargasson_respirator"] = {
+            "name": "Sargasson Respirator",
+            "count": 1,
+            "description": "A compact apparatus that supplies the dense native gas Sargassons breathe. Most off-world Sargassons wear one as casually as clothing."
+        }
+
+func sargasson_requires_respirator() -> bool:
+    return player_profile.get("species", "") == "Sargasson" and not bool(world_flags.get("sargasson_inner_breath", false))
+
+func unlock_sargasson_inner_breath() -> void:
+    if player_profile.get("species", "") != "Sargasson":
+        return
+    world_flags["sargasson_inner_breath"] = true
+    message_requested.emit("Your inner flame sustains your breath. The respirator is no longer necessary.")
     state_changed.emit()
 
 func _apply_background(background: String) -> void:
