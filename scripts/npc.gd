@@ -201,7 +201,7 @@ func _cael_dialogue() -> Dictionary:
         return {"speaker": display_name, "text": "Sit still long enough and you will feel where your own warmth stops and the world's begins. Start there. The rest takes years.", "choices": [{"text": "Back.", "action": "back"}]}
 
     var choices: Array = []
-    var first_steps_ready := GameState.quests.has("first_steps") and GameState.quests["first_steps"]["state"] == "active" and int(GameState.quests["first_steps"]["stage"]) == 1
+    var first_steps_ready: bool = GameState.quests.has("first_steps") and GameState.quests["first_steps"]["state"] == "active" and int(GameState.quests["first_steps"]["stage"]) == 1
     if q["state"] == "not_started":
         var work_text := "Preceptor Varro sent me." if first_steps_ready else "Do you have work for me?"
         choices.append({"text": work_text, "action": "cael_work"})
