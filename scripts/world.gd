@@ -28,7 +28,7 @@ func _build_world() -> void:
     # Broken paving gives the court a hand-built, weathered rhythm.
     for x in [-10.5, -7.0, -3.5, 0.0, 3.5, 7.0, 10.5]:
         for z in [-6.5, -2.5, 1.5, 5.5, 9.5]:
-            var lift := 0.10 + abs(sin(x * 0.31 + z * 0.17)) * 0.035
+            var lift: float = 0.10 + abs(sin(x * 0.31 + z * 0.17)) * 0.035
             _box("Paver", Vector3(x, lift, z), Vector3(3.0, 0.10, 3.2), STONE_PALE.darkened(0.08), false)
 
     # Outer monastery shell: heavy and slightly too tall for comfort.
