@@ -191,9 +191,6 @@ func _build_hud() -> void:
     _style_label(message_label, true)
     add_child(message_label)
 
-    # Bottom-wide, dynamically sized dialogue window. This keeps the box from
-    # feeling like a modern full-width overlay and prevents response rows from
-    # drifting offscreen at different browser sizes.
     dialogue_panel = PanelContainer.new()
     dialogue_panel.set_anchors_preset(Control.PRESET_BOTTOM_WIDE)
     dialogue_panel.offset_left = 92
@@ -289,6 +286,8 @@ func _build_hud() -> void:
     tv.add_child(close_t)
 
 func refresh() -> void:
+    health_bar.max_value = GameState.max_health
+    charge_bar.max_value = GameState.max_charge
     health_bar.value = GameState.health
     charge_bar.value = GameState.charge
     quest_label.text = "CURRENT DUTY\n" + GameState.current_objective()
@@ -390,12 +389,14 @@ func _refresh_journal() -> void:
     t += "\n[font_size=19][b]Journal[/b][/font_size]\n"
     for quest_id in GameState.quests:
         var q: Dictionary = GameState.quests[quest_id]
+        if q["state"] == "not_started":
+            continue
         t += "[u]%s[/u] — %s\n" % [q["name"], q["state"]]
         if q["state"] == "active":
             t += "  %s\n" % q["objectives"][int(q["stage"])]
         elif q["state"] == "completed":
             t += "  Resolution: %s\n" % q["resolution"]
-    t += "\n[i]WASD move • Shift sprint • Space jump • E interact • Left-click attack • F kindle • M meditate • J journal • F5 save • F9 load[/i]"
+    t += "\n[i]WASD move • Shift sprint • Space jump • E interact • Left-click attack • F kindle • M meditate • R ration • J journal • F5 save • F9 load[/i]"
     journal_text.text = t
 
 func close_modal() -> void:
