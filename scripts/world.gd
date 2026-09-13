@@ -5,6 +5,7 @@ const PICKUP = preload("res://scripts/pickup.gd")
 const LORE = preload("res://scripts/lore_object.gd")
 const DUMMY = preload("res://scripts/training_dummy.gd")
 const TRAVEL = preload("res://scripts/travel_marker.gd")
+const RITUAL = preload("res://scripts/ritual_object.gd")
 
 func _ready() -> void:
     _build_world()
@@ -35,8 +36,14 @@ func _build_world() -> void:
     _box("AnnexWestA", Vector3(25.5, 2.5, -10.0), Vector3(1, 5, 7), Color(0.12, 0.15, 0.18))
     _box("AnnexWestB", Vector3(25.5, 2.5, 0.0), Vector3(1, 5, 7), Color(0.12, 0.15, 0.18))
 
+    _spawn_npc("Preceptor Varro", "varro", Vector3(0.0, 0, -5.0), Color(0.36, 0.28, 0.25))
     _spawn_npc("Brother Cael", "cael", Vector3(-2.5, 0, 3.0), Color(0.58, 0.34, 0.16))
     _spawn_npc("Sera Nemm", "sera", Vector3(8.0, 0, 10.5), Color(0.18, 0.48, 0.42))
+    _spawn_npc("Initiate Kes", "novice", Vector3(-7.5, 0, 5.5), Color(0.36, 0.40, 0.55))
+
+    var bell = RITUAL.new()
+    bell.position = Vector3(-10.8, 0, -5.5)
+    add_child(bell)
 
     var dummy = DUMMY.new()
     dummy.position = Vector3(-8.5, 0, 8.0)
@@ -49,7 +56,7 @@ func _build_world() -> void:
     terminal.position = Vector3(38.0, 0, -9.5)
     add_child(terminal)
 
-    if not GameState.has_item("resonator_core") and GameState.quests["resonator_core"]["state"] != "completed":
+    if GameState.quests.has("resonator_core") and not GameState.has_item("resonator_core") and GameState.quests["resonator_core"]["state"] != "completed":
         var core = PICKUP.new()
         core.item_id = "resonator_core"
         core.display_name = "Pneuma Resonator Core"
