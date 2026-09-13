@@ -7,8 +7,16 @@ var arrival_yaw: float = 0.0
 var door_color: Color = Color(0.10, 0.15, 0.18)
 var travel_message: String = ""
 var door_size: Vector3 = Vector3(3.3, 4.4, 0.34)
+var required_quest_id: String = ""
+var required_quest_state: String = "completed"
+var locked_message: String = "The door does not answer you."
 
 func _ready() -> void:
+    # The main dwelling is not open to arrivals until Varro enters them among the novices.
+    if display_name == "Main Monastic Dwelling" and required_quest_id == "":
+        required_quest_id = "first_steps"
+        locked_message = "The amber strip flashes once. Your novice seal does not answer it."
+
     var mesh_instance := MeshInstance3D.new()
     var mesh := BoxMesh.new()
     mesh.size = door_size
@@ -28,7 +36,6 @@ func _ready() -> void:
     collision.position.y = door_size.y * 0.5
     add_child(collision)
 
-    # A narrow amber control strip keeps the ancient door just technological enough.
     var strip := MeshInstance3D.new()
     var strip_mesh := BoxMesh.new()
     strip_mesh.size = Vector3(0.10, 1.15, 0.05)
@@ -42,12 +49,27 @@ func _ready() -> void:
     strip.position = Vector3(door_size.x * 0.38, door_size.y * 0.47, -door_size.z * 0.58)
     add_child(strip)
 
+func _is_locked() -> bool:
+    if required_quest_id == "":
+        return false
+    if not GameState.quests.has(required_quest_id):
+        return true
+    return str(GameState.quests[required_quest_id].get("state", "")) != required_quest_state
+
 func get_interaction_text() -> String:
+    if _is_locked():
+        return "Examine %s" % display_name
     return "Enter %s" % display_name
 
 func interact(player) -> void:
+    if _is_locked():
+        GameState.message_requested.emit(locked_message)
+        return
     player.global_position = destination
     player.rotation.y = arrival_yaw
     player.velocity = Vector3.ZERO
-    if travel_message != "":
+    if display_name == "Main Monastic Dwelling" and not GameState.discovered_locations.has("Monastic Dwelling"):
+        GameState.discovered_locations.append("Monastic Dwelling")
+        GameState.message_requested.emit("Location discovered: Monastic Dwelling")
+    elif travel_message != "":
         GameState.message_requested.emit(travel_message)
