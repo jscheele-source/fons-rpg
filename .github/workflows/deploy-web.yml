@@ -50,6 +50,10 @@ jobs:
             exit 1
           fi
 
+      - name: Smoke-test dialogue branches
+        shell: bash
+        run: godot --headless --path . -s res://tests/dialogue_smoke.gd
+
       - name: Export browser build
         shell: bash
         run: |
