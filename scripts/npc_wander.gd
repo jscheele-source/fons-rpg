@@ -50,7 +50,7 @@ func _process(delta: float) -> void:
             return
 
         _face(flat_target)
-        var step := min(walk_speed * delta, distance)
+        var step: float = minf(walk_speed * delta, distance)
         actor.global_position += offset.normalized() * step
         return
 
