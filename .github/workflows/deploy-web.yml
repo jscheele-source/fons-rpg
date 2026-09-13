@@ -52,7 +52,7 @@ jobs:
 
       - name: Smoke-test dialogue branches
         shell: bash
-        run: godot --headless --path . -s res://tests/dialogue_smoke.gd
+        run: godot --headless --path . res://tests/DialogueSmoke.tscn
 
       - name: Export browser build
         shell: bash
