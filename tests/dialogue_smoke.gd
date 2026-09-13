@@ -1,8 +1,8 @@
-extends SceneTree
+extends Node
 
 const NPC = preload("res://scripts/npc.gd")
 
-func _initialize() -> void:
+func _ready() -> void:
     GameState.new_game({
         "name": "Test Initiate",
         "species": "Human",
@@ -20,15 +20,15 @@ func _initialize() -> void:
     var root: Dictionary = npc.get_dialogue()
     if str(root.get("text", "")).find("carrying the resonator") == -1:
         push_error("Nemm root dialogue did not enter the carrying-core branch.")
-        quit(1)
+        get_tree().quit(1)
         return
 
     npc.choose("sera_offer")
     var offer: Dictionary = npc.get_dialogue()
     if str(offer.get("text", "")).find("Measure it. Copy the readings.") == -1:
         push_error("Nemm's 'What would you do with it?' topic did not advance.")
-        quit(1)
+        get_tree().quit(1)
         return
 
     print("Dialogue smoke test passed: Nemm offer topic advances correctly.")
-    quit(0)
+    get_tree().quit(0)
