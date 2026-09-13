@@ -14,42 +14,66 @@ var pitch := 0.0
 var attack_cooldown := 0.0
 var athletics_timer := 0.0
 
+# Track held physical keys explicitly. This is more reliable in browser builds
+# than continuously polling logical key state.
+var move_forward := false
+var move_back := false
+var move_left := false
+var move_right := false
+var sprinting := false
+var jump_held := false
+
 func _ready() -> void:
     # Web browsers only allow pointer-lock after an explicit user gesture.
-    # Starting visible lets the first click reliably enter the game.
     if OS.has_feature("web"):
         Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
-        hud.show_message("Click inside the game to begin. Esc releases the mouse.")
+        hud.show_message("Click inside the game to capture the mouse. WASD moves even before capture.")
     else:
         Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
 
 func _unhandled_input(event: InputEvent) -> void:
-    if event is InputEventKey and event.pressed and not event.echo:
+    if event is InputEventKey and not event.echo:
+        # Held controls are updated on both key-down and key-up.
         match event.physical_keycode:
-            KEY_ESCAPE:
-                if hud.has_modal_open():
-                    hud.close_modal()
-                else:
-                    Input.mouse_mode = Input.MOUSE_MODE_VISIBLE if Input.mouse_mode == Input.MOUSE_MODE_CAPTURED else Input.MOUSE_MODE_CAPTURED
-            KEY_E:
-                if not hud.has_modal_open():
-                    interact()
-            KEY_F:
-                if not hud.has_modal_open():
-                    kindle_flame()
-            KEY_M:
-                if not hud.has_modal_open():
-                    meditate()
-            KEY_J:
-                if not hud.dialogue_open:
-                    hud.toggle_journal()
-            KEY_F5:
-                GameState.save_game(self)
-            KEY_F9:
-                GameState.load_game(self)
+            KEY_W:
+                move_forward = event.pressed
+            KEY_S:
+                move_back = event.pressed
+            KEY_A:
+                move_left = event.pressed
+            KEY_D:
+                move_right = event.pressed
+            KEY_SHIFT:
+                sprinting = event.pressed
+            KEY_SPACE:
+                jump_held = event.pressed
+
+        # One-shot actions only fire on key-down.
+        if event.pressed:
+            match event.physical_keycode:
+                KEY_ESCAPE:
+                    if hud.has_modal_open():
+                        hud.close_modal()
+                    else:
+                        Input.mouse_mode = Input.MOUSE_MODE_VISIBLE if Input.mouse_mode == Input.MOUSE_MODE_CAPTURED else Input.MOUSE_MODE_CAPTURED
+                KEY_E:
+                    if not hud.has_modal_open():
+                        interact()
+                KEY_F:
+                    if not hud.has_modal_open():
+                        kindle_flame()
+                KEY_M:
+                    if not hud.has_modal_open():
+                        meditate()
+                KEY_J:
+                    if not hud.dialogue_open:
+                        hud.toggle_journal()
+                KEY_F5:
+                    GameState.save_game(self)
+                KEY_F9:
+                    GameState.load_game(self)
 
     # In browsers, pointer lock must be requested from a click event.
-    # The first click enters the game; subsequent left clicks attack.
     if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
         if hud.has_modal_open():
             return
@@ -70,7 +94,10 @@ func _unhandled_input(event: InputEvent) -> void:
 
 func _physics_process(delta: float) -> void:
     attack_cooldown = max(attack_cooldown - delta, 0.0)
-    if hud.has_modal_open() or Input.mouse_mode != Input.MOUSE_MODE_CAPTURED:
+
+    # Modal UI pauses movement. Mouse capture is NOT required for keyboard movement,
+    # which avoids browser pointer-lock quirks.
+    if hud.has_modal_open():
         velocity.x = move_toward(velocity.x, 0, WALK_SPEED)
         velocity.z = move_toward(velocity.z, 0, WALK_SPEED)
         if not is_on_floor():
@@ -80,17 +107,17 @@ func _physics_process(delta: float) -> void:
         return
 
     var input_vec := Vector2.ZERO
-    if Input.is_key_pressed(KEY_W):
+    if move_forward:
         input_vec.y -= 1.0
-    if Input.is_key_pressed(KEY_S):
+    if move_back:
         input_vec.y += 1.0
-    if Input.is_key_pressed(KEY_A):
+    if move_left:
         input_vec.x -= 1.0
-    if Input.is_key_pressed(KEY_D):
+    if move_right:
         input_vec.x += 1.0
     input_vec = input_vec.normalized()
 
-    var speed := SPRINT_SPEED if Input.is_key_pressed(KEY_SHIFT) else WALK_SPEED
+    var speed := SPRINT_SPEED if sprinting else WALK_SPEED
     var direction := (transform.basis * Vector3(input_vec.x, 0, input_vec.y)).normalized()
     if direction != Vector3.ZERO:
         velocity.x = direction.x * speed
@@ -105,7 +132,7 @@ func _physics_process(delta: float) -> void:
 
     if not is_on_floor():
         velocity.y -= 9.8 * delta
-    elif Input.is_key_pressed(KEY_SPACE):
+    elif jump_held:
         velocity.y = JUMP_VELOCITY
 
     move_and_slide()
