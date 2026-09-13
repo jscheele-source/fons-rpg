@@ -105,7 +105,7 @@ func _apply_species_starting_gear(species: String) -> void:
         inventory["sargasson_respirator"] = {
             "name": "Sargasson Respirator",
             "count": 1,
-            "description": "A compact apparatus that supplies the dense native gas Sargassons breathe. Most off-world Sargassons wear one as casually as clothing."
+            "description": "A compact hip-mounted canister feeds dense native breathing gas through a flexible line to a fitted mouthpiece. Most off-world Sargassons wear one as casually as clothing."
         }
 
 func sargasson_requires_respirator() -> bool:
