@@ -40,6 +40,16 @@ jobs:
         shell: bash
         run: godot --headless --verbose --path . --editor --quit
 
+      - name: Smoke-test courtyard scene
+        shell: bash
+        run: |
+          set -o pipefail
+          godot --headless --verbose --path . res://scenes/Main.tscn --quit-after 2 2>&1 | tee main-scene.log
+          if grep -q "SCRIPT ERROR" main-scene.log; then
+            echo "Runtime script error detected while opening Main.tscn"
+            exit 1
+          fi
+
       - name: Export browser build
         shell: bash
         run: |
