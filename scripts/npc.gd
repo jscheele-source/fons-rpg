@@ -230,6 +230,31 @@ func _cael_dialogue() -> Dictionary:
 
 func _sera_dialogue() -> Dictionary:
     var q: Dictionary = GameState.quests["resonator_core"]
+
+    # Topic pages must be checked before the carrying-core branch. Otherwise
+    # selecting a topic simply redraws the root page and appears unresponsive.
+    if current_page == "sera_offer":
+        return {
+            "speaker": display_name,
+            "text": "Measure it. Copy the readings. Send one copy to the monastery and one off-world before either office has time to lose it. Bago pays for redundancy. I will also pay you better than Cael will.",
+            "choices": [
+                {"text": "Give Nemm the core.", "action": "sera_give_core"},
+                {"text": "Back.", "action": "back"},
+            ]
+        }
+    if current_page == "sera_lore":
+        return {
+            "speaker": display_name,
+            "text": "Winne Bago's people call this a research lease. The monastery calls it temporary accommodation. I have learned not to ask which wording appears on the same document.",
+            "choices": [{"text": "Back.", "action": "back"}]
+        }
+    if current_page == "sera_thanks":
+        return {
+            "speaker": display_name,
+            "text": "Good. Whatever it proves, there will be two copies of the numbers before anyone discovers a reason to misplace them.",
+            "choices": [{"text": "Goodbye.", "action": "close"}]
+        }
+
     if q["state"] == "active" and GameState.has_item("resonator_core"):
         return {
             "speaker": display_name,
@@ -240,12 +265,6 @@ func _sera_dialogue() -> Dictionary:
                 {"text": "Not yet.", "action": "close"},
             ]
         }
-    if current_page == "sera_offer":
-        return {"speaker": display_name, "text": "Measure it. Copy the readings. Send one copy to the monastery and one off-world before either office has time to lose it. Bago pays for redundancy. I will also pay you better than Cael will.", "choices": [{"text": "Give Nemm the core.", "action": "sera_give_core"}, {"text": "Back.", "action": "back"}]}
-    if current_page == "sera_lore":
-        return {"speaker": display_name, "text": "Winne Bago's people call this a research lease. The monastery calls it temporary accommodation. I have learned not to ask which wording appears on the same document.", "choices": [{"text": "Back.", "action": "back"}]}
-    if current_page == "sera_thanks":
-        return {"speaker": display_name, "text": "Good. Whatever it proves, there will be two copies of the numbers before anyone discovers a reason to misplace them.", "choices": [{"text": "Goodbye.", "action": "close"}]}
     if q["state"] == "completed" and q["resolution"] == "flamen":
         return {"speaker": display_name, "text": "You gave the core to the monastery. Sensible. Safe. Those words overlap more often than I like.", "choices": [{"text": "Goodbye.", "action": "close"}]}
     return {
