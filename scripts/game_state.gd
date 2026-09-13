@@ -59,6 +59,18 @@ func _ready() -> void:
 
 func reset_quests() -> void:
     quests = {
+        "first_steps": {
+            "name": "First Steps on Iustitia",
+            "state": "not_started",
+            "stage": 0,
+            "resolution": "",
+            "objectives": [
+                "Report to Preceptor Varro in the Outer Courtyard.",
+                "Ask Brother Cael for a courtyard duty.",
+                "Complete Brother Cael's assigned duty.",
+                "Return to Preceptor Varro.",
+            ],
+        },
         "resonator_core": {
             "name": "A Question of Resonance",
             "state": "not_started",
@@ -69,7 +81,7 @@ func reset_quests() -> void:
                 "Recover the Pneuma Resonator Core from the abandoned research annex.",
                 "Decide who should receive the Resonator Core.",
             ],
-        }
+        },
     }
 
 func new_game(profile_data: Dictionary) -> void:
@@ -94,10 +106,16 @@ func new_game(profile_data: Dictionary) -> void:
     world_flags = {
         "new_arrival": true,
         "sargasson_inner_breath": false,
+        "rang_processional_bell": false,
+        "varro_addressed_bell": false,
+        "varro_met": false,
     }
     reset_quests()
+    quests["first_steps"]["state"] = "active"
+    quests["first_steps"]["stage"] = 0
     _apply_species_starting_gear(player_profile["species"])
     _apply_background(player_profile["background"])
+    quest_updated.emit("first_steps")
     state_changed.emit()
 
 func _apply_species_starting_gear(species: String) -> void:
@@ -116,6 +134,16 @@ func unlock_sargasson_inner_breath() -> void:
         return
     world_flags["sargasson_inner_breath"] = true
     message_requested.emit("Your inner flame sustains your breath. The respirator is no longer necessary.")
+    state_changed.emit()
+
+func ring_processional_bell() -> void:
+    if bool(world_flags.get("rang_processional_bell", false)):
+        message_requested.emit("The bell answers again. This time, fewer people look up.")
+        return
+    world_flags["rang_processional_bell"] = true
+    if quests.has("first_steps") and quests["first_steps"]["state"] == "active":
+        factions["Flamen"] = int(factions.get("Flamen", 0)) - 1
+    message_requested.emit("The note rolls across the courtyard. Several conversations stop at once.")
     state_changed.emit()
 
 func _apply_background(background: String) -> void:
@@ -208,6 +236,7 @@ func start_quest(quest_id: String) -> void:
         quests[quest_id]["stage"] = 1
         quest_updated.emit(quest_id)
         message_requested.emit("Quest started: %s" % quests[quest_id]["name"])
+        state_changed.emit()
 
 func set_quest_stage(quest_id: String, stage: int) -> void:
     if not quests.has(quest_id):
@@ -224,10 +253,25 @@ func complete_quest(quest_id: String, resolution: String) -> void:
     quests[quest_id]["resolution"] = resolution
     quest_updated.emit(quest_id)
     message_requested.emit("Quest completed: %s" % quests[quest_id]["name"])
+    if quest_id == "resonator_core" and quests.has("first_steps") and quests["first_steps"]["state"] == "active":
+        quests["first_steps"]["stage"] = 3
+        quest_updated.emit("first_steps")
+    state_changed.emit()
+
+func complete_first_steps() -> void:
+    if not quests.has("first_steps") or quests["first_steps"]["state"] == "completed":
+        return
+    quests["first_steps"]["state"] = "completed"
+    quests["first_steps"]["resolution"] = str(quests["resonator_core"].get("resolution", ""))
+    factions["Flamen"] = int(factions.get("Flamen", 0)) + 2
+    quest_updated.emit("first_steps")
+    message_requested.emit("Quest completed: First Steps on Iustitia")
     state_changed.emit()
 
 func current_objective() -> String:
-    for quest_id in quests:
+    for quest_id in ["first_steps", "resonator_core"]:
+        if not quests.has(quest_id):
+            continue
         var q: Dictionary = quests[quest_id]
         if q["state"] == "active":
             var stage := int(q["stage"])
