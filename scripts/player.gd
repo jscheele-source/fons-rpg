@@ -14,17 +14,14 @@ var pitch := 0.0
 var attack_cooldown := 0.0
 var athletics_timer := 0.0
 
-# Track held physical keys explicitly. This is more reliable in browser builds
-# than continuously polling logical key state.
 var move_forward := false
 var move_back := false
 var move_left := false
 var move_right := false
 var sprinting := false
-var jump_held := false
+var jump_requested := false
 
 func _ready() -> void:
-    # Web browsers only allow pointer-lock after an explicit user gesture.
     if OS.has_feature("web"):
         Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
         hud.show_message("Click inside the game to capture the mouse. WASD moves even before capture.")
@@ -33,7 +30,6 @@ func _ready() -> void:
 
 func _unhandled_input(event: InputEvent) -> void:
     if event is InputEventKey and not event.echo:
-        # Held controls are updated on both key-down and key-up.
         match event.physical_keycode:
             KEY_W:
                 move_forward = event.pressed
@@ -45,12 +41,11 @@ func _unhandled_input(event: InputEvent) -> void:
                 move_right = event.pressed
             KEY_SHIFT:
                 sprinting = event.pressed
-            KEY_SPACE:
-                jump_held = event.pressed
 
-        # One-shot actions only fire on key-down.
         if event.pressed:
             match event.physical_keycode:
+                KEY_SPACE:
+                    jump_requested = true
                 KEY_ESCAPE:
                     if hud.has_modal_open():
                         hud.close_modal()
@@ -65,6 +60,9 @@ func _unhandled_input(event: InputEvent) -> void:
                 KEY_M:
                     if not hud.has_modal_open():
                         meditate()
+                KEY_R:
+                    if not hud.has_modal_open():
+                        use_ration()
                 KEY_J:
                     if not hud.dialogue_open:
                         hud.toggle_journal()
@@ -73,7 +71,6 @@ func _unhandled_input(event: InputEvent) -> void:
                 KEY_F9:
                     GameState.load_game(self)
 
-    # In browsers, pointer lock must be requested from a click event.
     if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
         if hud.has_modal_open():
             return
@@ -95,13 +92,12 @@ func _unhandled_input(event: InputEvent) -> void:
 func _physics_process(delta: float) -> void:
     attack_cooldown = max(attack_cooldown - delta, 0.0)
 
-    # Modal UI pauses movement. Mouse capture is NOT required for keyboard movement,
-    # which avoids browser pointer-lock quirks.
     if hud.has_modal_open():
         velocity.x = move_toward(velocity.x, 0, WALK_SPEED)
         velocity.z = move_toward(velocity.z, 0, WALK_SPEED)
         if not is_on_floor():
             velocity.y -= 9.8 * delta
+        jump_requested = false
         move_and_slide()
         update_prompt()
         return
@@ -132,8 +128,9 @@ func _physics_process(delta: float) -> void:
 
     if not is_on_floor():
         velocity.y -= 9.8 * delta
-    elif jump_held:
+    elif jump_requested:
         velocity.y = JUMP_VELOCITY
+    jump_requested = false
 
     move_and_slide()
     update_prompt()
@@ -169,6 +166,9 @@ func attack() -> void:
             GameState.add_skill_xp("Blade", 1.5)
 
 func kindle_flame() -> void:
+    if GameState.health >= GameState.max_health:
+        hud.show_message("You are already uninjured.")
+        return
     if GameState.spend_charge(18.0):
         GameState.heal(24.0 + GameState.skills["Flamecraft"]["level"] * 0.4)
         GameState.add_skill_xp("Flamecraft", 1.2)
@@ -178,9 +178,22 @@ func meditate() -> void:
     if velocity.length() > 0.2:
         hud.show_message("You must be still to meditate.")
         return
+    if GameState.charge >= GameState.max_charge:
+        hud.show_message("Your inner flame is already steady.")
+        return
     GameState.restore_charge(16.0 + GameState.skills["Meditation"]["level"] * 0.5)
     GameState.add_skill_xp("Meditation", 1.0)
     hud.show_message("You steady your breathing and gather Pneuma.")
+
+func use_ration() -> void:
+    if GameState.health >= GameState.max_health:
+        hud.show_message("You have no need to use a travel ration now.")
+        return
+    if not GameState.remove_item("traveler_ration", 1):
+        hud.show_message("You have no travel rations left.")
+        return
+    GameState.heal(18.0)
+    hud.show_message("You eat a travel ration and recover some strength.")
 
 func open_dialogue(npc) -> void:
     hud.open_dialogue(npc)
