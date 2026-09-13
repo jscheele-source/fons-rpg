@@ -39,10 +39,10 @@ func _build_world() -> void:
     _box("AnnexWestA", Vector3(25.5, 2.5, -10.0), Vector3(1, 5, 7), Color(0.12, 0.15, 0.18))
     _box("AnnexWestB", Vector3(25.5, 2.5, 0.0), Vector3(1, 5, 7), Color(0.12, 0.15, 0.18))
 
-    _spawn_npc("Preceptor Varro", "varro", Vector3(0.0, 0, -5.0), Color(0.36, 0.28, 0.25))
-    _spawn_npc("Brother Cael", "cael", Vector3(-2.5, 0, 3.0), Color(0.58, 0.34, 0.16))
-    _spawn_npc("Sera Nemm", "sera", Vector3(8.0, 0, 10.5), Color(0.18, 0.48, 0.42))
-    _spawn_npc("Initiate Kes", "novice", Vector3(-7.5, 0, 5.5), Color(0.36, 0.40, 0.55))
+    _spawn_npc("Preceptor Varro", "varro", Vector3(0.0, 0.12, -5.0), Color(0.36, 0.28, 0.25))
+    _spawn_npc("Brother Cael", "cael", Vector3(-2.5, 0.12, 3.0), Color(0.58, 0.34, 0.16))
+    _spawn_npc("Sera Nemm", "sera", Vector3(8.0, 0.12, 10.5), Color(0.18, 0.48, 0.42))
+    _spawn_npc("Initiate Kes", "novice", Vector3(-7.5, 0.12, 5.5), Color(0.36, 0.40, 0.55))
 
     var bell = RITUAL.new()
     bell.position = Vector3(-10.8, 0, -5.5)
@@ -90,6 +90,38 @@ func _spawn_npc(name_text: String, id: String, pos: Vector3, color: Color) -> vo
     npc.dialogue_id = id
     npc.body_color = color
     npc.position = pos
+
+    # Build a minimal visible/interactable shell before the NPC enters the tree.
+    # This keeps browser runtime errors in the richer NPC visual builder from
+    # making the entire character disappear.
+    var fallback_shape := CapsuleShape3D.new()
+    fallback_shape.radius = 0.48
+    fallback_shape.height = 1.85
+    var fallback_collision := CollisionShape3D.new()
+    fallback_collision.shape = fallback_shape
+    fallback_collision.position.y = 0.95
+    npc.add_child(fallback_collision)
+
+    var fallback_mesh := CapsuleMesh.new()
+    fallback_mesh.radius = 0.48
+    fallback_mesh.height = 1.85
+    var fallback_mat := StandardMaterial3D.new()
+    fallback_mat.albedo_color = color.lightened(0.12)
+    fallback_mat.roughness = 0.78
+    fallback_mesh.material = fallback_mat
+    var fallback_visual := MeshInstance3D.new()
+    fallback_visual.mesh = fallback_mesh
+    fallback_visual.position.y = 0.95
+    npc.add_child(fallback_visual)
+
+    var nameplate := Label3D.new()
+    nameplate.text = name_text
+    nameplate.position = Vector3(0, 2.75, 0)
+    nameplate.billboard = BaseMaterial3D.BILLBOARD_ENABLED
+    nameplate.font_size = 36
+    nameplate.outline_size = 8
+    npc.add_child(nameplate)
+
     add_child(npc)
 
 func _box(node_name: String, pos: Vector3, size: Vector3, color: Color, collision_enabled: bool = true) -> void:
