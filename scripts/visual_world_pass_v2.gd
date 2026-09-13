@@ -5,11 +5,13 @@ const NPC_WANDER = preload("res://scripts/npc_wander.gd")
 # Species anatomy now belongs to the character model itself. This pass only
 # handles presentation/ambient behavior for already-built characters.
 func _decorate_characters() -> void:
-    var world := get_parent()
-    for node in world.get_children():
-        if not node.has_method("get_dialogue"):
-            continue
-        _prepare_character(node)
+    _visit_for_characters(get_parent())
+
+func _visit_for_characters(root: Node) -> void:
+    for node in root.get_children():
+        if node.has_method("get_dialogue"):
+            _prepare_character(node)
+        _visit_for_characters(node)
 
 func _prepare_character(npc: Node3D) -> void:
     var label = npc.get("display_name")
@@ -30,6 +32,6 @@ func _prepare_character(npc: Node3D) -> void:
         "Initiate Kes":
             controller.configure(npc, Vector2(1.7, 1.45), 0.66)
         _:
-            # Characters without a safe outdoor wander zone still face the
-            # player correctly. Elder Davian, for example, remains at his post.
+            # Characters without a safe wander zone still face the player
+            # correctly but remain at their assigned post.
             controller.configure(npc, Vector2.ZERO, 0.0)
