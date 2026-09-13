@@ -32,16 +32,23 @@ func _build_courtyard_entrance() -> void:
     add_child(entrance)
 
 func _build_interior(root: Node3D) -> void:
-    # Entry hall: broad enough for processions, nearly empty in ordinary use.
-    _room_floor(root, "EntryFloor", Vector3(0, 0.06, 13), Vector3(10, 0.12, 10))
-    _ceiling(root, "EntryCeiling", Vector3(0, 4.9, 13), Vector3(10, 0.28, 10))
-    _wall(root, "EntryWest", Vector3(-5, 2.45, 13), Vector3(0.45, 4.9, 10))
-    _wall(root, "EntryEast", Vector3(5, 2.45, 13), Vector3(0.45, 4.9, 10))
-    _wall(root, "EntrySouthL", Vector3(-3.35, 2.45, 18), Vector3(3.3, 4.9, 0.45))
-    _wall(root, "EntrySouthR", Vector3(3.35, 2.45, 18), Vector3(3.3, 4.9, 0.45))
-    _wall(root, "EntryNorthL", Vector3(-3.55, 2.45, 8), Vector3(2.9, 4.9, 0.45))
-    _wall(root, "EntryNorthR", Vector3(3.55, 2.45, 8), Vector3(2.9, 4.9, 0.45))
-    _interior_arch(root, Vector3(0, 0, 8.15), 4.1, 4.5)
+    _build_entry_hall(root)
+    _build_junction(root)
+    _build_library(root)
+    _build_dormitory(root)
+    _build_meditation_court(root)
+    _build_council_passage(root)
+
+func _build_entry_hall(root: Node3D) -> void:
+    _room_floor(root, "EntryFloor", Vector3(0, 0.06, 13), Vector3(10.2, 0.12, 10.2))
+    _ceiling(root, "EntryCeiling", Vector3(0, 4.9, 13), Vector3(10.2, 0.28, 10.2))
+    _wall(root, "EntryWest", Vector3(-5.0, 2.45, 13), Vector3(0.55, 4.9, 10.5))
+    _wall(root, "EntryEast", Vector3(5.0, 2.45, 13), Vector3(0.55, 4.9, 10.5))
+    _wall(root, "EntrySouthL", Vector3(-3.65, 2.45, 18.0), Vector3(3.0, 4.9, 0.55))
+    _wall(root, "EntrySouthR", Vector3(3.65, 2.45, 18.0), Vector3(3.0, 4.9, 0.55))
+    _wall(root, "EntryNorthL", Vector3(-3.75, 2.45, 8.0), Vector3(2.6, 4.9, 0.55))
+    _wall(root, "EntryNorthR", Vector3(3.75, 2.45, 8.0), Vector3(2.6, 4.9, 0.55))
+    _interior_arch(root, Vector3(0, 0, 8.0), 4.8, 4.4)
     _brazier(root, Vector3(-3.3, 0, 10.4))
     _brazier(root, Vector3(3.3, 0, 10.4))
     _warm_light(root, Vector3(0, 3.7, 13), 1.9, 9.0)
@@ -55,47 +62,36 @@ func _build_interior(root: Node3D) -> void:
     exit_door.travel_message = "Cold Iustitian air returns around you."
     root.add_child(exit_door)
 
-    # Narrow central passage. The monastery is much larger than its population requires.
-    _corridor_z(root, Vector3(0, 0, 5.0), 5.0, 6.0, true)
+    _corridor_z(root, Vector3(0, 0, 5.45), 4.8, 5.5, true)
 
-    # Junction hall connecting the older wings.
-    _room_floor(root, "JunctionFloor", Vector3(0, 0.06, 0), Vector3(8, 0.12, 6))
-    _ceiling(root, "JunctionCeiling", Vector3(0, 4.7, 0), Vector3(8, 0.28, 6))
-    _corner_wall(root, Vector3(-3.8, 2.35, 2.75), Vector3(0.4, 4.7, 1.5))
-    _corner_wall(root, Vector3(3.8, 2.35, 2.75), Vector3(0.4, 4.7, 1.5))
-    _corner_wall(root, Vector3(-3.8, 2.35, -2.75), Vector3(0.4, 4.7, 1.5))
-    _corner_wall(root, Vector3(3.8, 2.35, -2.75), Vector3(0.4, 4.7, 1.5))
+func _build_junction(root: Node3D) -> void:
+    _room_floor(root, "JunctionFloor", Vector3(0, 0.06, 0), Vector3(8.4, 0.12, 6.4))
+    _ceiling(root, "JunctionCeiling", Vector3(0, 4.7, 0), Vector3(8.4, 0.28, 6.4))
+    for x in [-3.95, 3.95]:
+        for z in [-2.95, 2.95]:
+            _box(root, "JunctionPier", Vector3(x, 2.35, z), Vector3(0.7, 4.7, 0.7), STONE_DARK)
     _warm_light(root, Vector3(0, 3.6, 0), 1.25, 8.0)
-
-    # West branch: monastic library and study room.
-    _corridor_x(root, Vector3(-6.0, 0, 0), 4.0, 3.4)
-    _build_library(root)
-
-    # East branch: spartan dormitory wing.
-    _corridor_x(root, Vector3(6.0, 0, 0), 4.0, 3.4)
-    _build_dormitory(root)
-
-    # North branch: meditation courtyard and the old council passage.
-    _corridor_z(root, Vector3(0, 0, -6.0), 4.0, 6.0, true)
-    _build_meditation_court(root)
-    _build_council_passage(root)
+    _corridor_x(root, Vector3(-6.0, 0, 0), 4.4, 4.2, true)
+    _corridor_x(root, Vector3(6.0, 0, 0), 4.4, 4.2, true)
+    _corridor_z(root, Vector3(0, 0, -6.0), 4.6, 6.2, true)
 
 func _build_library(root: Node3D) -> void:
     var center := Vector3(-13.0, 0, 0)
-    _room_floor(root, "LibraryFloor", center + Vector3(0, 0.06, 0), Vector3(10, 0.12, 12))
-    _ceiling(root, "LibraryCeiling", center + Vector3(0, 4.8, 0), Vector3(10, 0.28, 12))
-    _wall(root, "LibraryWest", center + Vector3(-5, 2.4, 0), Vector3(0.45, 4.8, 12))
-    _wall(root, "LibraryNorth", center + Vector3(0, 2.4, -6), Vector3(10, 4.8, 0.45))
-    _wall(root, "LibrarySouth", center + Vector3(0, 2.4, 6), Vector3(10, 4.8, 0.45))
-    _wall(root, "LibraryEastN", center + Vector3(5, 2.4, -4.1), Vector3(0.45, 4.8, 3.8))
-    _wall(root, "LibraryEastS", center + Vector3(5, 2.4, 4.1), Vector3(0.45, 4.8, 3.8))
+    _room_floor(root, "LibraryFloor", center + Vector3(0, 0.06, 0), Vector3(10.4, 0.12, 12.4))
+    _ceiling(root, "LibraryCeiling", center + Vector3(0, 4.8, 0), Vector3(10.4, 0.28, 12.4))
+    _wall(root, "LibraryWest", center + Vector3(-5.1, 2.4, 0), Vector3(0.55, 4.8, 12.7))
+    _wall(root, "LibraryNorth", center + Vector3(0, 2.4, -6.1), Vector3(10.7, 4.8, 0.55))
+    _wall(root, "LibrarySouth", center + Vector3(0, 2.4, 6.1), Vector3(10.7, 4.8, 0.55))
+    _wall(root, "LibraryEastN", center + Vector3(5.1, 2.4, -4.25), Vector3(0.55, 4.8, 3.7))
+    _wall(root, "LibraryEastS", center + Vector3(5.1, 2.4, 4.25), Vector3(0.55, 4.8, 3.7))
+    _seam_post(root, center + Vector3(-5.1, 0, -6.1))
+    _seam_post(root, center + Vector3(-5.1, 0, 6.1))
 
     _shelf(root, center + Vector3(-3.5, 0, -3.6), Vector3(0, 90, 0))
     _shelf(root, center + Vector3(-3.5, 0, 0), Vector3(0, 90, 0))
     _shelf(root, center + Vector3(-3.5, 0, 3.6), Vector3(0, 90, 0))
     _shelf(root, center + Vector3(1.2, 0, -4.7), Vector3.ZERO)
     _shelf(root, center + Vector3(1.2, 0, 4.7), Vector3.ZERO)
-
     _table(root, center + Vector3(1.2, 0, 0), Vector3(3.8, 0.18, 1.6))
     _datapad(root, center + Vector3(0.7, 1.04, -0.1))
     _datapad(root, center + Vector3(1.8, 1.04, 0.15))
@@ -104,19 +100,18 @@ func _build_library(root: Node3D) -> void:
 
 func _build_dormitory(root: Node3D) -> void:
     var center := Vector3(13.0, 0, 0)
-    _room_floor(root, "DormFloor", center + Vector3(0, 0.06, 0), Vector3(10, 0.12, 16))
-    _ceiling(root, "DormCeiling", center + Vector3(0, 4.55, 0), Vector3(10, 0.28, 16))
-    _wall(root, "DormEast", center + Vector3(5, 2.3, 0), Vector3(0.45, 4.6, 16))
-    _wall(root, "DormNorth", center + Vector3(0, 2.3, -8), Vector3(10, 4.6, 0.45))
-    _wall(root, "DormSouth", center + Vector3(0, 2.3, 8), Vector3(10, 4.6, 0.45))
-    _wall(root, "DormWestN", center + Vector3(-5, 2.3, -5.0), Vector3(0.45, 4.6, 6.0))
-    _wall(root, "DormWestS", center + Vector3(-5, 2.3, 5.0), Vector3(0.45, 4.6, 6.0))
+    _room_floor(root, "DormFloor", center + Vector3(0, 0.06, 0), Vector3(10.4, 0.12, 16.4))
+    _ceiling(root, "DormCeiling", center + Vector3(0, 4.55, 0), Vector3(10.4, 0.28, 16.4))
+    _wall(root, "DormEast", center + Vector3(5.1, 2.3, 0), Vector3(0.55, 4.6, 16.7))
+    _wall(root, "DormNorth", center + Vector3(0, 2.3, -8.1), Vector3(10.7, 4.6, 0.55))
+    _wall(root, "DormSouth", center + Vector3(0, 2.3, 8.1), Vector3(10.7, 4.6, 0.55))
+    _wall(root, "DormWestN", center + Vector3(-5.1, 2.3, -5.1), Vector3(0.55, 4.6, 6.0))
+    _wall(root, "DormWestS", center + Vector3(-5.1, 2.3, 5.1), Vector3(0.55, 4.6, 6.0))
+    _seam_post(root, center + Vector3(5.1, 0, -8.1), 4.6)
+    _seam_post(root, center + Vector3(5.1, 0, 8.1), 4.6)
 
-    # Low partitions imply many more cells than are currently occupied.
-    _wall(root, "DormDividerN", center + Vector3(0, 1.55, -2.7), Vector3(10, 3.1, 0.30))
-    _wall(root, "DormDividerS", center + Vector3(0, 1.55, 2.7), Vector3(10, 3.1, 0.30))
-    _wall(root, "DormDividerW", center + Vector3(0, 1.55, -5.35), Vector3(0.30, 3.1, 5.0))
-    _wall(root, "DormDividerE", center + Vector3(0, 1.55, 5.35), Vector3(0.30, 3.1, 5.0))
+    _partition_x_with_opening(root, center + Vector3(0, 0, -2.7), 10.0, 2.0)
+    _partition_x_with_opening(root, center + Vector3(0, 0, 2.7), 10.0, 2.0)
 
     _bed(root, center + Vector3(-2.7, 0, -5.5), 0.0)
     _dresser(root, center + Vector3(2.7, 0, -5.8))
@@ -124,62 +119,79 @@ func _build_dormitory(root: Node3D) -> void:
     _dresser(root, center + Vector3(-2.7, 0, 5.8))
     _bed(root, center + Vector3(-2.7, 0, 0.2), 0.0)
     _dresser(root, center + Vector3(2.7, 0, 0.2))
-
     _wall_lamp(root, center + Vector3(4.7, 2.6, -5.4))
     _wall_lamp(root, center + Vector3(4.7, 2.6, 0.0))
     _wall_lamp(root, center + Vector3(4.7, 2.6, 5.4))
 
 func _build_meditation_court(root: Node3D) -> void:
     var center := Vector3(0, 0, -15.0)
-    _room_floor(root, "MeditationStone", center + Vector3(0, 0.05, 0), Vector3(14, 0.10, 12), STONE_MID)
-    _box(root, "MeditationSoil", center + Vector3(0, 0.12, 0), Vector3(7.2, 0.16, 6.6), Color(0.30, 0.20, 0.20), false)
-    _wall(root, "MeditationWest", center + Vector3(-7, 2.5, 0), Vector3(0.45, 5.0, 12))
-    _wall(root, "MeditationEast", center + Vector3(7, 2.5, 0), Vector3(0.45, 5.0, 12))
-    _wall(root, "MeditationSouthL", center + Vector3(-4.3, 2.5, 6), Vector3(5.4, 5.0, 0.45))
-    _wall(root, "MeditationSouthR", center + Vector3(4.3, 2.5, 6), Vector3(5.4, 5.0, 0.45))
-    _wall(root, "MeditationNorthL", center + Vector3(-4.3, 2.5, -6), Vector3(5.4, 5.0, 0.45))
-    _wall(root, "MeditationNorthR", center + Vector3(4.3, 2.5, -6), Vector3(5.4, 5.0, 0.45))
+    _room_floor(root, "MeditationStone", center + Vector3(0, 0.05, 0), Vector3(14.4, 0.10, 12.4), STONE_MID)
+    _box(root, "MeditationSoil", center + Vector3(0, 0.09, 0), Vector3(7.2, 0.08, 6.6), Color(0.30, 0.20, 0.20), false)
+    _wall(root, "MeditationWest", center + Vector3(-7.1, 2.5, 0), Vector3(0.55, 5.0, 12.7))
+    _wall(root, "MeditationEast", center + Vector3(7.1, 2.5, 0), Vector3(0.55, 5.0, 12.7))
+    _wall(root, "MeditationSouthL", center + Vector3(-4.85, 2.5, 6.1), Vector3(4.5, 5.0, 0.55))
+    _wall(root, "MeditationSouthR", center + Vector3(4.85, 2.5, 6.1), Vector3(4.5, 5.0, 0.55))
+    _wall(root, "MeditationNorthL", center + Vector3(-4.85, 2.5, -6.1), Vector3(4.5, 5.0, 0.55))
+    _wall(root, "MeditationNorthR", center + Vector3(4.85, 2.5, -6.1), Vector3(4.5, 5.0, 0.55))
+    _seam_post(root, center + Vector3(-7.1, 0, -6.1), 5.0)
+    _seam_post(root, center + Vector3(7.1, 0, -6.1), 5.0)
+    _seam_post(root, center + Vector3(-7.1, 0, 6.1), 5.0)
+    _seam_post(root, center + Vector3(7.1, 0, 6.1), 5.0)
+    _interior_arch(root, center + Vector3(0, 0, 6.0), 5.0, 4.5)
+    _interior_arch(root, center + Vector3(0, 0, -6.0), 5.0, 4.5)
 
-    _tree(root, center + Vector3(0, 0.12, 0))
-    _mat(root, center + Vector3(-4.7, 0.18, -1.8), 15.0)
-    _mat(root, center + Vector3(4.7, 0.18, -1.8), -15.0)
-    _mat(root, center + Vector3(-4.7, 0.18, 2.0), -12.0)
-    _mat(root, center + Vector3(4.7, 0.18, 2.0), 12.0)
-
-    # Davian-like meditation altar: candles, herbs, stones and small chimes.
-    _box(root, "MeditationAltar", center + Vector3(0, 1.05, -5.25), Vector3(4.2, 1.8, 0.55), STONE_PALE)
+    _tree(root, center + Vector3(0, 0.10, 0))
+    _mat(root, center + Vector3(-4.7, 0.13, -1.8), 15.0)
+    _mat(root, center + Vector3(4.7, 0.13, -1.8), -15.0)
+    _mat(root, center + Vector3(-4.7, 0.13, 2.0), -12.0)
+    _mat(root, center + Vector3(4.7, 0.13, 2.0), 12.0)
+    _box(root, "MeditationAltar", center + Vector3(0, 1.05, -5.15), Vector3(4.2, 1.8, 0.55), STONE_PALE)
     for x in [-1.5, -0.7, 0.1, 0.9, 1.55]:
-        _candle(root, center + Vector3(x, 2.05, -4.92))
-    _chimes(root, center + Vector3(-2.25, 3.1, -4.9))
-    _chimes(root, center + Vector3(2.25, 3.1, -4.9))
-    _warm_light(root, center + Vector3(0, 2.4, -4.5), 1.35, 7.0)
+        _candle(root, center + Vector3(x, 2.05, -4.82))
+    _chimes(root, center + Vector3(-2.25, 3.1, -4.8))
+    _chimes(root, center + Vector3(2.25, 3.1, -4.8))
+    _warm_light(root, center + Vector3(0, 2.4, -4.4), 1.35, 7.0)
 
 func _build_council_passage(root: Node3D) -> void:
-    # A cramped, dim, coiling approach to the council chamber.
-    _corridor_z(root, Vector3(0, 0, -23.6), 3.2, 5.2, false)
-    _corridor_x(root, Vector3(-3.0, 0, -26.2), 6.0, 3.2, false)
-    _corridor_z(root, Vector3(-6.0, 0, -29.4), 3.2, 6.4, false)
-    _corridor_x(root, Vector3(-2.0, 0, -32.6), 8.0, 3.2, false)
-
+    _corridor_z(root, Vector3(0, 0, -23.5), 4.0, 5.0, false)
+    _turning_square(root, Vector3(0, 0, -26.0), 4.0)
+    _corridor_x(root, Vector3(-3.0, 0, -26.0), 6.0, 4.0, false)
+    _turning_square(root, Vector3(-6.0, 0, -26.0), 4.0)
+    _corridor_z(root, Vector3(-6.0, 0, -29.5), 4.0, 7.0, false)
+    _turning_square(root, Vector3(-6.0, 0, -33.0), 4.0)
+    _corridor_x(root, Vector3(-2.0, 0, -33.0), 8.0, 4.0, false)
     _warm_light(root, Vector3(-5.9, 2.8, -29.5), 0.65, 5.0, Color(0.72, 0.38, 0.18))
-    _box(root, "CouncilDoor", Vector3(2.05, 2.25, -32.6), Vector3(0.38, 4.5, 3.1), BLUE_DOOR)
-    _box(root, "CouncilControl", Vector3(1.80, 1.4, -31.35), Vector3(0.12, 0.8, 0.25), MACHINE, false)
+    _box(root, "CouncilDoor", Vector3(2.15, 2.25, -33.0), Vector3(0.42, 4.5, 3.4), BLUE_DOOR)
+    _box(root, "CouncilControl", Vector3(1.90, 1.4, -31.55), Vector3(0.12, 0.8, 0.25), MACHINE, false)
 
 func _corridor_z(root: Node3D, center: Vector3, width: float, length: float, lit: bool = false) -> void:
-    _room_floor(root, "CorridorFloor", center + Vector3(0, 0.05, 0), Vector3(width, 0.10, length))
-    _ceiling(root, "CorridorCeiling", center + Vector3(0, 4.45, 0), Vector3(width, 0.25, length))
-    _wall(root, "CorridorWallL", center + Vector3(-width * 0.5, 2.25, 0), Vector3(0.35, 4.5, length))
-    _wall(root, "CorridorWallR", center + Vector3(width * 0.5, 2.25, 0), Vector3(0.35, 4.5, length))
+    _room_floor(root, "CorridorFloor", center + Vector3(0, 0.05, 0), Vector3(width, 0.10, length + 0.25))
+    _ceiling(root, "CorridorCeiling", center + Vector3(0, 4.45, 0), Vector3(width, 0.25, length + 0.25))
+    _wall(root, "CorridorWallL", center + Vector3(-width * 0.5, 2.25, 0), Vector3(0.40, 4.5, length + 0.30))
+    _wall(root, "CorridorWallR", center + Vector3(width * 0.5, 2.25, 0), Vector3(0.40, 4.5, length + 0.30))
     if lit:
         _warm_light(root, center + Vector3(0, 3.3, 0), 0.9, 6.0)
 
 func _corridor_x(root: Node3D, center: Vector3, length: float, width: float, lit: bool = true) -> void:
-    _room_floor(root, "CorridorFloor", center + Vector3(0, 0.05, 0), Vector3(length, 0.10, width))
-    _ceiling(root, "CorridorCeiling", center + Vector3(0, 4.45, 0), Vector3(length, 0.25, width))
-    _wall(root, "CorridorWallN", center + Vector3(0, 2.25, -width * 0.5), Vector3(length, 4.5, 0.35))
-    _wall(root, "CorridorWallS", center + Vector3(0, 2.25, width * 0.5), Vector3(length, 4.5, 0.35))
+    _room_floor(root, "CorridorFloor", center + Vector3(0, 0.05, 0), Vector3(length + 0.25, 0.10, width))
+    _ceiling(root, "CorridorCeiling", center + Vector3(0, 4.45, 0), Vector3(length + 0.25, 0.25, width))
+    _wall(root, "CorridorWallN", center + Vector3(0, 2.25, -width * 0.5), Vector3(length + 0.30, 4.5, 0.40))
+    _wall(root, "CorridorWallS", center + Vector3(0, 2.25, width * 0.5), Vector3(length + 0.30, 4.5, 0.40))
     if lit:
         _warm_light(root, center + Vector3(0, 3.3, 0), 0.9, 6.0)
+
+func _turning_square(root: Node3D, center: Vector3, size: float) -> void:
+    _room_floor(root, "TurningFloor", center + Vector3(0, 0.05, 0), Vector3(size, 0.10, size))
+    _ceiling(root, "TurningCeiling", center + Vector3(0, 4.45, 0), Vector3(size, 0.25, size))
+
+func _partition_x_with_opening(root: Node3D, center: Vector3, total_length: float, opening: float) -> void:
+    var segment := (total_length - opening) * 0.5
+    var offset := opening * 0.5 + segment * 0.5
+    _wall(root, "DormPartitionL", center + Vector3(-offset, 1.55, 0), Vector3(segment + 0.12, 3.1, 0.30))
+    _wall(root, "DormPartitionR", center + Vector3(offset, 1.55, 0), Vector3(segment + 0.12, 3.1, 0.30))
+
+func _seam_post(root: Node3D, pos: Vector3, height: float = 4.8) -> void:
+    _box(root, "StoneSeamPost", pos + Vector3(0, height * 0.5, 0), Vector3(0.72, height, 0.72), STONE_DARK)
 
 func _room_floor(root: Node3D, node_name: String, pos: Vector3, size: Vector3, color: Color = FLOOR) -> void:
     _box(root, node_name, pos, size, color)
@@ -189,9 +201,6 @@ func _ceiling(root: Node3D, node_name: String, pos: Vector3, size: Vector3) -> v
 
 func _wall(root: Node3D, node_name: String, pos: Vector3, size: Vector3) -> void:
     _box(root, node_name, pos, size, STONE_DARK)
-
-func _corner_wall(root: Node3D, pos: Vector3, size: Vector3) -> void:
-    _box(root, "JunctionWall", pos, size, STONE_DARK)
 
 func _box(root: Node3D, node_name: String, pos: Vector3, size: Vector3, color: Color, collision_enabled: bool = true) -> void:
     var body := StaticBody3D.new()
@@ -215,15 +224,15 @@ func _box(root: Node3D, node_name: String, pos: Vector3, size: Vector3, color: C
     root.add_child(body)
 
 func _interior_arch(root: Node3D, pos: Vector3, opening_width: float, opening_height: float) -> void:
-    _box(root, "InnerArchL", pos + Vector3(-opening_width * 0.64, opening_height * 0.45, 0), Vector3(1.05, opening_height, 0.8), STONE_PALE)
-    _box(root, "InnerArchR", pos + Vector3(opening_width * 0.64, opening_height * 0.45, 0), Vector3(1.05, opening_height, 0.8), STONE_PALE)
-    _box(root, "InnerArchTop", pos + Vector3(0, opening_height, 0), Vector3(opening_width + 2.3, 0.8, 0.8), STONE_PALE)
+    var pillar_offset := opening_width * 0.5 + 0.45
+    _box(root, "InnerArchL", pos + Vector3(-pillar_offset, opening_height * 0.5, 0), Vector3(0.9, opening_height, 0.65), STONE_PALE)
+    _box(root, "InnerArchR", pos + Vector3(pillar_offset, opening_height * 0.5, 0), Vector3(0.9, opening_height, 0.65), STONE_PALE)
+    _box(root, "InnerArchTop", pos + Vector3(0, opening_height + 0.35, 0), Vector3(opening_width + 1.8, 0.7, 0.65), STONE_PALE)
 
 func _brazier(root: Node3D, pos: Vector3) -> void:
     var holder := Node3D.new()
     holder.position = pos
     root.add_child(holder)
-
     var stem := MeshInstance3D.new()
     var stem_mesh := CylinderMesh.new()
     stem_mesh.top_radius = 0.10
@@ -238,7 +247,6 @@ func _brazier(root: Node3D, pos: Vector3) -> void:
     stem.mesh = stem_mesh
     stem.position.y = 0.55
     holder.add_child(stem)
-
     var flame := MeshInstance3D.new()
     var flame_mesh := CylinderMesh.new()
     flame_mesh.top_radius = 0.03
@@ -347,7 +355,6 @@ func _tree(root: Node3D, pos: Vector3) -> void:
     trunk.mesh = trunk_mesh
     trunk.position = pos + Vector3(0, 2.05, 0)
     root.add_child(trunk)
-
     for data in [
         [Vector3(-1.2, 4.15, 0.2), Vector3(1.9, 1.15, 1.5)],
         [Vector3(1.1, 4.35, -0.4), Vector3(1.8, 1.2, 1.6)],
@@ -382,7 +389,6 @@ func _candle(root: Node3D, pos: Vector3) -> void:
     wax.mesh = wax_mesh
     wax.position = pos
     root.add_child(wax)
-
     var flame := MeshInstance3D.new()
     var flame_mesh := SphereMesh.new()
     flame_mesh.radius = 0.055
