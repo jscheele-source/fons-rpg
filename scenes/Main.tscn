@@ -8,7 +8,7 @@
 [ext_resource type="Script" path="res://scripts/visual_world_pass_v2.gd" id="6_visual_world"]
 [ext_resource type="Script" path="res://scripts/monastery_expansion.gd" id="7_expansion"]
 [ext_resource type="Script" path="res://scripts/monastery_population.gd" id="8_population"]
-[ext_resource type="Script" path="res://scripts/monastery_layout_fix.gd" id="9_layout_fix"]
+[ext_resource type="Script" path="res://scripts/monastery_route_repair.gd" id="9_route_repair"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape_player"]
 radius = 0.45
@@ -76,8 +76,8 @@ script = ExtResource("7_expansion")
 [node name="MonasteryPopulation" type="Node3D" parent="."]
 script = ExtResource("8_population")
 
-[node name="MonasteryLayoutFix" type="Node3D" parent="."]
-script = ExtResource("9_layout_fix")
+[node name="MonasteryRouteRepair" type="Node3D" parent="."]
+script = ExtResource("9_route_repair")
 
 [node name="HUD" type="CanvasLayer" parent="."]
 script = ExtResource("3_hud")
