@@ -23,6 +23,7 @@ func _rock(pos: Vector3, rock_scale: Vector3, color: Color) -> void:
     var shape := BoxShape3D.new()
     shape.size = Vector3(rock_scale.x * 1.55, rock_scale.y * 1.55, rock_scale.z * 1.55)
     var collision := CollisionShape3D.new()
+    collision.name = "CollisionShape3D"
     collision.shape = shape
     body.add_child(collision)
     add_child(body)
@@ -38,6 +39,7 @@ func _distant_monolith(pos: Vector3) -> void:
     var shape := BoxShape3D.new()
     shape.size = Vector3(3.0, 11.0, 2.2)
     var collision := CollisionShape3D.new()
+    collision.name = "CollisionShape3D"
     collision.shape = shape
     body.add_child(collision)
     add_child(body)
