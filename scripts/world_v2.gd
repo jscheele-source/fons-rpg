@@ -53,11 +53,11 @@ func _open_west_garden() -> void:
     _box("GardenGateNorthPier", Vector3(-14.7, 2.2, 1.55), Vector3(1.65, 4.4, 0.72), STONE_PALE)
     _box("GardenGateSouthPier", Vector3(-14.7, 2.2, 7.45), Vector3(1.65, 4.4, 0.72), STONE_PALE)
     _box("GardenGateLintel", Vector3(-14.7, 4.35, 4.5), Vector3(1.65, 0.75, 6.6), STONE_PALE)
-    _box("GardenThreshold", Vector3(-16.1, 0.04, 4.5), Vector3(3.5, 0.16, 5.2), STONE_MID, false)
+    _box("GardenThreshold", Vector3(-16.1, 0.04, 4.5), Vector3(3.5, 0.16, 5.2), STONE_MID)
 
 func _build_west_garden() -> void:
     var center := Vector3(-24.3, 0.0, 4.7)
-    _box("WestGardenFloor", center + Vector3(0, 0.02, 0), Vector3(17.8, 0.16, 18.6), STONE_MID.darkened(0.08), false)
+    _box("WestGardenFloor", center + Vector3(0, 0.02, 0), Vector3(17.8, 0.16, 18.6), STONE_MID.darkened(0.08))
 
     _box("WestGardenWall", Vector3(-33.2, 3.0, 4.7), Vector3(1.1, 6.0, 18.6), STONE_DARK)
     _box("WestGardenNorthWall", Vector3(-24.3, 3.0, -4.6), Vector3(17.8, 6.0, 1.1), STONE_DARK)
