@@ -42,10 +42,10 @@ func take_damage(damage: float, source) -> void:
     var direction := Vector3(0, 0.25, -1)
     if source is Node3D:
         direction = global_position - source.global_position
-        direction.y = max(direction.y, 0.22)
+        direction.y = maxf(direction.y, 0.22)
     if direction.length() < 0.01:
         direction = Vector3(0, 0.25, -1)
     direction = direction.normalized()
-    var impulse_strength := clamp(1.8 + damage * 0.18, 2.0, 6.5)
+    var impulse_strength: float = clampf(1.8 + damage * 0.18, 2.0, 6.5)
     apply_central_impulse(direction * impulse_strength)
     apply_torque_impulse(Vector3(0.15, 0.55, -0.25) * impulse_strength * 0.22)
