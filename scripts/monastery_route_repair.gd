@@ -19,8 +19,12 @@ func _ready() -> void:
 
 func _repair_route() -> void:
     var interior := get_node_or_null("../MonasteryInterior/IustitiaMonasteryInterior")
+    var service_root := get_node_or_null("../MonasteryExpansion/MonasteryServiceWing")
     if interior == null:
         push_warning("Monastery route repair could not find the interior root.")
+        return
+    if service_root == null:
+        push_warning("Monastery route repair could not find the service-wing root.")
         return
 
     # Remove the six old council-approach wall slabs by position, not by node
@@ -37,7 +41,20 @@ func _repair_route() -> void:
                 removed_count += 1
                 break
 
-    # Rebuild those walls only between junction boundaries.
+    # The first service-wing corridor was also too long: its north/south side
+    # walls began at x=0 and therefore crossed the turning square itself.
+    # Remove those two slabs by position and rebuild them only between the
+    # doorway and the service hall.
+    var service_removed := 0
+    for child in service_root.get_children():
+        if not child is StaticBody3D:
+            continue
+        var p: Vector3 = child.position
+        if p.distance_to(Vector3(4.0, 2.2, -24.0)) < 0.08 or p.distance_to(Vector3(4.0, 2.2, -28.0)) < 0.08:
+            child.queue_free()
+            service_removed += 1
+
+    # Rebuild the council-approach walls only between junction boundaries.
     _wall(interior, "CouncilEntryWallL", Vector3(-2.0, 2.25, -22.6), Vector3(0.40, 4.5, 3.15), STONE_DARK)
     _wall(interior, "CouncilEntryWallR", Vector3(2.0, 2.25, -22.6), Vector3(0.40, 4.5, 3.15), STONE_DARK)
 
@@ -47,11 +64,15 @@ func _repair_route() -> void:
     _wall(interior, "CouncilNorthWallL", Vector3(-8.0, 2.25, -29.5), Vector3(0.40, 4.5, 3.15), STONE_DARK)
     _wall(interior, "CouncilNorthWallR", Vector3(-4.0, 2.25, -29.5), Vector3(0.40, 4.5, 3.15), STONE_DARK)
 
+    # Short, clean side walls for the service corridor: x=2.2 to x=5.8.
+    _wall(service_root, "ServicePassNorthClean", Vector3(4.0, 2.2, -28.0), Vector3(3.6, 4.4, 0.45), STONE_DARK)
+    _wall(service_root, "ServicePassSouthClean", Vector3(4.0, 2.2, -24.0), Vector3(3.6, 4.4, 0.45), STONE_DARK)
+
     # Give the new service wing an unmistakable architectural entrance at
     # the east edge of the first turning square.
     _doorway_z(interior, Vector3(2.05, 0.0, -26.0), 4.0, 3.0, 4.5)
 
-    print("Monastery route repair removed %d old blocker slabs and built the service-wing doorway." % removed_count)
+    print("Monastery route repair removed %d council blockers and %d service-corridor blockers." % [removed_count, service_removed])
 
 func _doorway_z(root: Node3D, base: Vector3, total_length: float, opening: float, height: float) -> void:
     var segment: float = (total_length - opening) * 0.5
