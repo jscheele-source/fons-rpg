@@ -64,21 +64,21 @@ func _spawn_loose_props() -> void:
     var service := get_node_or_null("../MonasteryExpansion/MonasteryServiceWing")
 
     if interior != null:
-        # A volume sitting slightly proud of the west library shelf can be knocked free.
-        _loose_book(interior, Vector3(-16.05, 1.18, -3.72), Vector3(0.28, 0.42, 0.12), Color(0.38, 0.19, 0.11), "Loose Meditation Volume", Vector3(0, 90, 0))
+        # These are supported by shelf/table geometry until the player knocks them free.
+        _loose_book(interior, Vector3(-16.35, 1.20, -3.72), Vector3(0.28, 0.42, 0.12), Color(0.38, 0.19, 0.11), "Loose Meditation Volume", Vector3(0, 90, 0))
         _loose_book(interior, Vector3(-11.7, 1.18, 0.25), Vector3(0.46, 0.10, 0.32), Color(0.20, 0.28, 0.22), "Open Reference Book", Vector3(0, 8, 0))
 
     if service != null:
-        _loose_book(service, Vector3(24.15, 1.18, -26.0), Vector3(0.28, 0.44, 0.12), Color(0.42, 0.24, 0.12), "Loose Commentary", Vector3(0, -90, 0))
+        _loose_book(service, Vector3(24.47, 1.21, -26.0), Vector3(0.28, 0.44, 0.12), Color(0.42, 0.24, 0.12), "Loose Commentary", Vector3(0, -90, 0))
         _loose_book(service, Vector3(19.1, 1.18, -24.0), Vector3(0.44, 0.10, 0.30), Color(0.24, 0.31, 0.23), "Copied Treatise", Vector3(0, -12, 0))
         _loose_book(service, Vector3(12.3, 1.05, -38.1), Vector3(0.38, 0.09, 0.28), Color(0.48, 0.38, 0.22), "Meal-side Notes", Vector3(0, 18, 0))
 
 func _loose_book(root: Node3D, pos: Vector3, size: Vector3, color: Color, label: String, rot: Vector3) -> void:
-    var prop = PROP.new()
-    prop.display_name = label
-    prop.prop_size = size
-    prop.prop_color = color
-    prop.prop_mass = 0.55
+    var prop: RigidBody3D = PROP.new()
+    prop.set("display_name", label)
+    prop.set("prop_size", size)
+    prop.set("prop_color", color)
+    prop.set("prop_mass", 0.55)
     prop.position = pos
     prop.rotation_degrees = rot
     root.add_child(prop)
