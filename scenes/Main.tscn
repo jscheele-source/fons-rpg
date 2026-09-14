@@ -1,4 +1,4 @@
-[gd_scene load_steps=12 format=3]
+[gd_scene load_steps=13 format=3]
 
 [ext_resource type="Script" path="res://scripts/world.gd" id="1_world"]
 [ext_resource type="Script" path="res://scripts/player.gd" id="2_player"]
@@ -8,6 +8,7 @@
 [ext_resource type="Script" path="res://scripts/visual_world_pass_v2.gd" id="6_visual_world"]
 [ext_resource type="Script" path="res://scripts/monastery_expansion.gd" id="7_expansion"]
 [ext_resource type="Script" path="res://scripts/monastery_population.gd" id="8_population"]
+[ext_resource type="Script" path="res://scripts/monastery_layout_fix.gd" id="9_layout_fix"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape_player"]
 radius = 0.45
@@ -74,6 +75,9 @@ script = ExtResource("7_expansion")
 
 [node name="MonasteryPopulation" type="Node3D" parent="."]
 script = ExtResource("8_population")
+
+[node name="MonasteryLayoutFix" type="Node3D" parent="."]
+script = ExtResource("9_layout_fix")
 
 [node name="HUD" type="CanvasLayer" parent="."]
 script = ExtResource("3_hud")
