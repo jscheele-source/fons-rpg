@@ -12,6 +12,10 @@ const BLOCKER_POSITIONS: Array[Vector3] = [
     Vector3(-3.0, 2.25, -24.0),
     Vector3(-8.0, 2.25, -29.5),
     Vector3(-4.0, 2.25, -29.5),
+    # Final east-west corridor toward the sealed council door. These two
+    # full-length side walls intruded into the third turning square.
+    Vector3(-2.0, 2.25, -31.0),
+    Vector3(-2.0, 2.25, -35.0),
 ]
 
 func _ready() -> void:
@@ -27,9 +31,9 @@ func _repair_route() -> void:
         push_warning("Monastery route repair could not find the service-wing root.")
         return
 
-    # Remove the six old council-approach wall slabs by position, not by node
-    # name. Godot may rename duplicate programmatically-created sibling nodes,
-    # which made the previous name-based repair unreliable.
+    # Remove the old council-approach wall slabs by position, not by node name.
+    # Godot may rename duplicate programmatically-created sibling nodes, which
+    # made the previous name-based repair unreliable.
     var removed_count := 0
     for child in interior.get_children():
         if not child is StaticBody3D:
@@ -63,6 +67,11 @@ func _repair_route() -> void:
 
     _wall(interior, "CouncilNorthWallL", Vector3(-8.0, 2.25, -29.5), Vector3(0.40, 4.5, 3.15), STONE_DARK)
     _wall(interior, "CouncilNorthWallR", Vector3(-4.0, 2.25, -29.5), Vector3(0.40, 4.5, 3.15), STONE_DARK)
+
+    # Final straight toward the council door: start at x=-4, just outside the
+    # third turning square, instead of continuing through the square itself.
+    _wall(interior, "CouncilFinalWallN", Vector3(-0.95, 2.25, -35.0), Vector3(6.10, 4.5, 0.40), STONE_DARK)
+    _wall(interior, "CouncilFinalWallS", Vector3(-0.95, 2.25, -31.0), Vector3(6.10, 4.5, 0.40), STONE_DARK)
 
     # Short, clean side walls for the service corridor: x=2.2 to x=5.8.
     _wall(service_root, "ServicePassNorthClean", Vector3(4.0, 2.2, -28.0), Vector3(3.6, 4.4, 0.45), STONE_DARK)
