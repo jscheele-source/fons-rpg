@@ -5,6 +5,15 @@ extends Node3D
 const STONE_DARK := Color(0.155, 0.145, 0.13)
 const STONE_PALE := Color(0.38, 0.34, 0.28)
 
+const BLOCKER_POSITIONS: Array[Vector3] = [
+    Vector3(-2.0, 2.25, -23.5),
+    Vector3(2.0, 2.25, -23.5),
+    Vector3(-3.0, 2.25, -28.0),
+    Vector3(-3.0, 2.25, -24.0),
+    Vector3(-8.0, 2.25, -29.5),
+    Vector3(-4.0, 2.25, -29.5),
+]
+
 func _ready() -> void:
     call_deferred("_repair_route")
 
@@ -14,27 +23,19 @@ func _repair_route() -> void:
         push_warning("Monastery route repair could not find the interior root.")
         return
 
-    # Remove only the three old council-approach corridor wall sets whose
-    # full-length collision boxes intruded into the turning squares.
+    # Remove the six old council-approach wall slabs by position, not by node
+    # name. Godot may rename duplicate programmatically-created sibling nodes,
+    # which made the previous name-based repair unreliable.
+    var removed_count := 0
     for child in interior.get_children():
         if not child is StaticBody3D:
             continue
         var p: Vector3 = child.position
-        var n := str(child.name)
-        var remove := false
-
-        # Meditation court -> first turning square.
-        if n in ["CorridorWallL", "CorridorWallR"] and is_equal_approx(p.z, -23.5) and abs(p.x) < 2.2:
-            remove = true
-        # First turning square -> second turning square.
-        elif n in ["CorridorWallN", "CorridorWallS"] and is_equal_approx(p.x, -3.0) and is_equal_approx(abs(p.z + 26.0), 2.0):
-            remove = true
-        # Second turning square -> third turning square.
-        elif n in ["CorridorWallL", "CorridorWallR"] and is_equal_approx(p.z, -29.5) and (is_equal_approx(p.x, -8.0) or is_equal_approx(p.x, -4.0)):
-            remove = true
-
-        if remove:
-            child.queue_free()
+        for blocker in BLOCKER_POSITIONS:
+            if p.distance_to(blocker) < 0.08:
+                child.queue_free()
+                removed_count += 1
+                break
 
     # Rebuild those walls only between junction boundaries.
     _wall(interior, "CouncilEntryWallL", Vector3(-2.0, 2.25, -22.6), Vector3(0.40, 4.5, 3.15), STONE_DARK)
@@ -49,6 +50,8 @@ func _repair_route() -> void:
     # Give the new service wing an unmistakable architectural entrance at
     # the east edge of the first turning square.
     _doorway_z(interior, Vector3(2.05, 0.0, -26.0), 4.0, 3.0, 4.5)
+
+    print("Monastery route repair removed %d old blocker slabs and built the service-wing doorway." % removed_count)
 
 func _doorway_z(root: Node3D, base: Vector3, total_length: float, opening: float, height: float) -> void:
     var segment: float = (total_length - opening) * 0.5
