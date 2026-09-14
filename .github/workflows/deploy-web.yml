@@ -54,12 +54,17 @@ jobs:
         shell: bash
         run: godot --headless --path . res://tests/DialogueSmoke.tscn
 
+      - name: Smoke-test character creation flow
+        shell: bash
+        run: godot --headless --path . res://tests/MenuFlowSmoke.tscn
+
       - name: Export browser build
         shell: bash
         run: |
           mkdir -v -p build/web
           EXPORT_DIR="$(readlink -f build)"
           godot --headless --verbose --path . --export-release "Web" "$EXPORT_DIR/web/index.html"
+          echo "${GITHUB_SHA}" > build/web/build-id.txt
           touch build/web/.nojekyll
 
       - name: Publish browser build
