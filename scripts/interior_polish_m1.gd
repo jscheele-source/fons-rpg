@@ -79,7 +79,7 @@ func _add_interior_lighting() -> void:
 
 func _soft_light(root: Node3D, pos: Vector3, energy: float, radius: float, color: Color = WARM) -> void:
     var light := OmniLight3D.new()
-    light.name = "M1SoftLight"
+    light.name = "M1SoftLight_%d_%d_%d" % [roundi(pos.x * 10.0), roundi(pos.y * 10.0), roundi(pos.z * 10.0)]
     light.position = pos
     light.light_color = color
     light.light_energy = energy
