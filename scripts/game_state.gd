@@ -29,6 +29,9 @@ var player_profile := {
     "species": "Human",
     "background": "Pilgrim",
     "answers": [],
+    "aptitude": "Unclassified",
+    "favored_attribute": "",
+    "major_skills": [],
 }
 
 var attributes: Dictionary = BASE_ATTRIBUTES.duplicate(true)
@@ -121,6 +124,9 @@ func new_game(profile_data: Dictionary) -> void:
         "species": str(profile_data.get("species", "Human")),
         "background": str(profile_data.get("background", "Pilgrim")),
         "answers": profile_data.get("answers", []).duplicate(true),
+        "aptitude": str(profile_data.get("aptitude", "Unclassified")),
+        "favored_attribute": str(profile_data.get("favored_attribute", "")),
+        "major_skills": profile_data.get("major_skills", []).duplicate(true),
     }
     attributes = BASE_ATTRIBUTES.duplicate(true)
     skills = BASE_SKILLS.duplicate(true)
@@ -147,6 +153,8 @@ func new_game(profile_data: Dictionary) -> void:
     quests["first_steps"]["stage"] = 0
     _apply_species_starting_gear(player_profile["species"])
     _apply_background(player_profile["background"])
+    _apply_aptitude(player_profile)
+    _refresh_derived_stats()
     quest_updated.emit("first_steps")
     state_changed.emit()
 
@@ -157,6 +165,26 @@ func _apply_species_starting_gear(species: String) -> void:
             "count": 1,
             "description": "A compact hip-mounted canister feeds dense native breathing gas through a flexible line to a fitted mouthpiece. Most off-world Sargassons wear one as casually as clothing."
         }
+
+func _apply_aptitude(profile_data: Dictionary) -> void:
+    var favored := str(profile_data.get("favored_attribute", ""))
+    if attributes.has(favored):
+        attributes[favored] = int(attributes[favored]) + 10
+
+    var majors: Array = profile_data.get("major_skills", [])
+    for skill_name in majors:
+        var skill := str(skill_name)
+        if skills.has(skill):
+            skills[skill]["level"] = int(skills[skill]["level"]) + 5
+
+func _refresh_derived_stats() -> void:
+    # At the baseline of 40, these remain the familiar 100/100. Favoring
+    # Endurance or Willpower is therefore immediately visible without making
+    # the other choices feel punished.
+    max_health = 60.0 + float(attributes.get("Endurance", 40))
+    max_charge = 60.0 + float(attributes.get("Willpower", 40))
+    health = max_health
+    charge = max_charge * 0.70
 
 func sargasson_requires_respirator() -> bool:
     return player_profile.get("species", "") == "Sargasson" and not bool(world_flags.get("sargasson_inner_breath", false))
@@ -370,6 +398,12 @@ func load_game(player: Node3D) -> void:
         message_requested.emit("Save file could not be read.")
         return
     player_profile = data.get("player_profile", player_profile)
+    if not player_profile.has("aptitude"):
+        player_profile["aptitude"] = "Unclassified"
+    if not player_profile.has("favored_attribute"):
+        player_profile["favored_attribute"] = ""
+    if not player_profile.has("major_skills"):
+        player_profile["major_skills"] = []
     attributes = data.get("attributes", attributes)
     skills = data.get("skills", skills)
     max_health = float(data.get("max_health", max_health))
