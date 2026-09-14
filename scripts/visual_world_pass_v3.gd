@@ -29,7 +29,18 @@ func _tower(pos: Vector3, radius: float, height: float) -> void:
 
 func _visual_box(pos: Vector3, size: Vector3, color: Color) -> void:
     super._visual_box(pos, size, color)
-    _box_collision(pos, size)
+    # Give substantial scenery collision, but leave thin wall-mounted details
+    # (service conduits, inset plaques, trim) decorative. Those pieces often
+    # cross door openings and should not become invisible barriers.
+    var substantial_axes := 0
+    if size.x >= 0.45:
+        substantial_axes += 1
+    if size.y >= 0.45:
+        substantial_axes += 1
+    if size.z >= 0.45:
+        substantial_axes += 1
+    if substantial_axes >= 2:
+        _box_collision(pos, size)
 
 func _bench(pos: Vector3, yaw: float) -> void:
     super._bench(pos, yaw)
