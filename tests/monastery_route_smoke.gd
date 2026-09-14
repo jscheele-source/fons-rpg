@@ -80,12 +80,19 @@ func _point_clear(local_point: Vector3, context: String) -> bool:
     if hits.is_empty():
         return true
 
-    var names: Array[String] = []
+    var details: Array[String] = []
     for hit in hits:
         var collider = hit.get("collider")
-        if collider != null:
-            names.append(str(collider.name))
-    _fail("Monastery route blocked at %s (%s) by %s" % [str(local_point), context, ", ".join(names)])
+        if collider == null:
+            continue
+        var detail := str(collider.name)
+        if collider is Node:
+            detail += " path=" + str(collider.get_path())
+        if collider is Node3D:
+            detail += " global=" + str((collider as Node3D).global_position)
+            detail += " local=" + str((collider as Node3D).position)
+        details.append(detail)
+    _fail("Monastery route blocked at %s (%s) by %s" % [str(local_point), context, " | ".join(details)])
     return false
 
 func _fail(message: String) -> void:
