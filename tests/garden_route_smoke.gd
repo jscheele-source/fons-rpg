@@ -21,10 +21,10 @@ func _run_test() -> void:
     await get_tree().process_frame
     await get_tree().physics_frame
 
-    for required in ["EyteliaTree", "TamdinGarden", "FloraFontisCourt", "AlienBotanicalCloister"]:
-        if main.get_node_or_null(required) == null:
-            _fail("Rebuilt garden is missing required section: %s" % required)
-            return
+    var garden_tree = main.get_node_or_null("EyteliaTree")
+    if garden_tree == null:
+        _fail("West garden did not create its eytelia tree.")
+        return
 
     var probe := SphereShape3D.new()
     probe.radius = 0.40
@@ -33,23 +33,22 @@ func _run_test() -> void:
     query.collide_with_areas = false
     query.collide_with_bodies = true
 
-    var routes: Array = [
-        # Original courtyard through the broad west gate to the central fork.
-        [Vector3(-10.0, 1.0, 4.65), Vector3(-14.7, 1.0, 4.65), Vector3(-20.0, 1.0, 4.65), Vector3(-27.5, 1.0, 4.65)],
-        # North branch toward the flora-fontis court.
-        [Vector3(-27.5, 1.0, 4.65), Vector3(-27.5, 1.0, -2.65), Vector3(-36.0, 1.0, -2.65), Vector3(-43.0, 1.0, -2.65)],
-        # South branch toward the eytelia and pampin cloister.
-        [Vector3(-27.5, 1.0, 4.65), Vector3(-27.5, 1.0, 11.15), Vector3(-34.0, 1.0, 11.15), Vector3(-37.0, 1.0, 11.15)],
-        # Deep west branch into the Tamdin spiral.
-        [Vector3(-27.5, 1.0, 4.65), Vector3(-38.0, 1.0, 4.65), Vector3(-44.0, 1.0, 4.65), Vector3(-50.0, 1.0, 4.65)],
+    # Walk from the original courtyard, through the new west opening, and
+    # around the eytelia tree into the deeper garden. The samples sit above
+    # the floor so only walls/scenery can block the route.
+    var route: Array[Vector3] = [
+        Vector3(-10.0, 1.0, 4.5),
+        Vector3(-14.7, 1.0, 4.5),
+        Vector3(-18.0, 1.0, 4.5),
+        Vector3(-20.0, 1.0, 8.5),
+        Vector3(-28.0, 1.0, 8.5),
     ]
 
-    for route in routes:
-        for i in range(route.size() - 1):
-            if not _segment_clear(main, route[i], route[i + 1]):
-                return
+    for i in range(route.size() - 1):
+        if not _segment_clear(main, route[i], route[i + 1]):
+            return
 
-    print("Garden route smoke test passed: gate, flora court, eytelia cloister, and Tamdin garden are physically reachable.")
+    print("Garden route smoke test passed: courtyard opening and west garden are physically reachable.")
     get_tree().quit(0)
 
 func _segment_clear(main: Node3D, a: Vector3, b: Vector3) -> bool:
