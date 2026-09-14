@@ -1,6 +1,6 @@
 extends Node3D
 
-const RESIDENT = preload("res://scripts/monastery_resident.gd")
+const RESIDENT = preload("res://scripts/monastery_resident_v2.gd")
 const PICKUP = preload("res://scripts/pickup.gd")
 const LORE = preload("res://scripts/lore_object.gd")
 
@@ -34,8 +34,8 @@ func _spawn_residents() -> void:
     archivist.resident_id = "archivist"
     archivist.species = "Felid"
     archivist.body_color = Color(0.27, 0.20, 0.15)
-    archivist.position = INTERIOR_ORIGIN + Vector3(18.3, 0.10, -24.6)
-    archivist.rotation_degrees.y = -20.0
+    archivist.position = INTERIOR_ORIGIN + Vector3(22.6, 0.10, -24.6)
+    archivist.rotation_degrees.y = 90.0
     add_child(archivist)
 
     var keeper = RESIDENT.new()
