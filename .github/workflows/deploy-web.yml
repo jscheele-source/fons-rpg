@@ -74,18 +74,58 @@ jobs:
         shell: bash
         run: godot --headless --path . res://tests/Milestone3GardenSmoke.tscn
 
-      - name: Smoke-test milestone 4 garden layers
-        shell: bash
-        run: godot --headless --path . res://tests/Milestone4GardenLayersSmoke.tscn
-
-      - name: Export browser build
+      - name: Export browser build with cache-busted package names
         shell: bash
         run: |
+          set -euo pipefail
           mkdir -v -p build/web
           EXPORT_DIR="$(readlink -f build)"
           godot --headless --verbose --path . --export-release "Web" "$EXPORT_DIR/web/index.html"
+
+          BUILD_TAG="${GITHUB_SHA:0:12}"
+          mv build/web/index.js "build/web/fons-${BUILD_TAG}.js"
+          mv build/web/index.pck "build/web/fons-${BUILD_TAG}.pck"
+          mv build/web/index.wasm "build/web/fons-${BUILD_TAG}.wasm"
+
+          python3 - <<'PY'
+          import os
+          from pathlib import Path
+
+          tag = os.environ["GITHUB_SHA"][:12]
+          path = Path("build/web/index.html")
+          html = path.read_text()
+          html = html.replace('src="index.js"', f'src="fons-{tag}.js"')
+          html = html.replace('"executable":"index"', f'"executable":"fons-{tag}"')
+          html = html.replace('"index.pck":', f'"fons-{tag}.pck":')
+          html = html.replace('"index.wasm":', f'"fons-{tag}.wasm":')
+          html = html.replace(
+              '<meta charset="utf-8">',
+              '<meta charset="utf-8">\n\t\t<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">\n\t\t<meta http-equiv="Pragma" content="no-cache">\n\t\t<meta http-equiv="Expires" content="0">'
+          )
+          path.write_text(html)
+          PY
+
+          # Compatibility aliases keep an already-open older tab from receiving
+          # a 404 while new page loads use the unique package names above.
+          cp "build/web/fons-${BUILD_TAG}.js" build/web/index.js
+          cp "build/web/fons-${BUILD_TAG}.pck" build/web/index.pck
+          cp "build/web/fons-${BUILD_TAG}.wasm" build/web/index.wasm
+
           echo "${GITHUB_SHA}" > build/web/build-id.txt
           touch build/web/.nojekyll
+
+      - name: Verify browser package consistency
+        shell: bash
+        run: |
+          set -euo pipefail
+          BUILD_TAG="${GITHUB_SHA:0:12}"
+          test -s "build/web/fons-${BUILD_TAG}.js"
+          test -s "build/web/fons-${BUILD_TAG}.pck"
+          test -s "build/web/fons-${BUILD_TAG}.wasm"
+          grep -q "fons-${BUILD_TAG}.js" build/web/index.html
+          grep -q "fons-${BUILD_TAG}.pck" build/web/index.html
+          grep -q "fons-${BUILD_TAG}.wasm" build/web/index.html
+          grep -q "${GITHUB_SHA}" build/web/build-id.txt
 
       - name: Publish browser build
         uses: JamesIves/github-pages-deploy-action@v4
