@@ -74,6 +74,10 @@ jobs:
         shell: bash
         run: godot --headless --path . res://tests/Milestone3GardenSmoke.tscn
 
+      - name: Smoke-test milestone 4 garden layers
+        shell: bash
+        run: godot --headless --path . res://tests/Milestone4GardenLayersSmoke.tscn
+
       - name: Export browser build
         shell: bash
         run: |
