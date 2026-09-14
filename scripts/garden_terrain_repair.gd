@@ -20,5 +20,7 @@ func _move_legacy_boulder() -> void:
         var node := child as Node3D
         if node.position.distance_to(old_center) > 0.20:
             continue
-        if node is MeshInstance3D or (node is StaticBody3D and node.name == "RockCollision"):
+        # Duplicate RockCollision nodes are auto-renamed by Godot, so position
+        # is the reliable identifier for this specific legacy rock pair.
+        if node is MeshInstance3D or node is StaticBody3D:
             node.position = new_center
