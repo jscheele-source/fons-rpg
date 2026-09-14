@@ -1,6 +1,6 @@
 extends Node3D
 
-const RESIDENT = preload("res://scripts/monastery_resident.gd")
+const RESIDENT = preload("res://scripts/monastery_resident_m1.gd")
 const PICKUP = preload("res://scripts/pickup.gd")
 const LORE = preload("res://scripts/lore_object.gd")
 
@@ -30,30 +30,33 @@ func _ensure_side_quest() -> void:
 
 func _spawn_residents() -> void:
     var archivist = RESIDENT.new()
+    archivist.name = "ArchivistSel"
     archivist.display_name = "Archivist Sel"
     archivist.resident_id = "archivist"
     archivist.species = "Felid"
     archivist.body_color = Color(0.27, 0.20, 0.15)
-    archivist.position = INTERIOR_ORIGIN + Vector3(18.3, 0.10, -24.6)
-    archivist.rotation_degrees.y = -20.0
+    archivist.position = INTERIOR_ORIGIN + Vector3(22.6, 0.10, -24.6)
+    archivist.rotation_degrees.y = 90.0
     add_child(archivist)
 
     var keeper = RESIDENT.new()
+    keeper.name = "KeeperOru"
     keeper.display_name = "Keeper Oru"
     keeper.resident_id = "keeper"
     keeper.species = "Gruhanian"
     keeper.body_color = Color(0.24, 0.22, 0.13)
-    keeper.position = INTERIOR_ORIGIN + Vector3(5.8, 0.10, -41.2)
-    keeper.rotation_degrees.y = -65.0
+    keeper.position = INTERIOR_ORIGIN + Vector3(4.7, 0.10, -39.0)
+    keeper.rotation_degrees.y = 90.0
     add_child(keeper)
 
     var novice = RESIDENT.new()
+    novice.name = "NovicePell"
     novice.display_name = "Novice Pell"
     novice.resident_id = "sargasson_novice"
     novice.species = "Sargasson"
     novice.body_color = Color(0.25, 0.27, 0.30)
-    novice.position = INTERIOR_ORIGIN + Vector3(13.2, 0.10, -38.0)
-    novice.rotation_degrees.y = 35.0
+    novice.position = INTERIOR_ORIGIN + Vector3(15.5, 0.10, -39.0)
+    novice.rotation_degrees.y = -90.0
     add_child(novice)
 
 func _spawn_missing_copy() -> void:
