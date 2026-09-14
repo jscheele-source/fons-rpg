@@ -33,7 +33,7 @@ func _build_m4_flora_fontis_layer(pos: Vector3) -> void:
 
 func _m4_luminous_bloom(root: Node3D, pos: Vector3, index: int) -> void:
     var stalk := MeshInstance3D.new()
-    stalk.name = "M4FloraStalk"
+    stalk.name = "M4FloraStalk_%02d" % index
     var stalk_mesh := CylinderMesh.new()
     stalk_mesh.top_radius = 0.025
     stalk_mesh.bottom_radius = 0.045
@@ -48,7 +48,7 @@ func _m4_luminous_bloom(root: Node3D, pos: Vector3, index: int) -> void:
     root.add_child(stalk)
 
     var bloom := MeshInstance3D.new()
-    bloom.name = "M4FloraBloom"
+    bloom.name = "M4FloraBloom_%02d" % index
     var bloom_mesh := SphereMesh.new()
     bloom_mesh.radius = 0.095 + float(index % 3) * 0.018
     bloom_mesh.height = bloom_mesh.radius * 1.55
@@ -97,7 +97,7 @@ func _m4_tamdin_cluster(root: Node3D, pos: Vector3, index: int) -> void:
     _m4_fleshy_limb(cluster, Vector3(0, height * 0.52, -0.035), height * 0.78, 0.038, Color(0.72, 0.59, 0.53), Vector3(0, 0, -3))
 
     var crown := MeshInstance3D.new()
-    crown.name = "M4TamdinCrown"
+    crown.name = "M4TamdinCrown_%02d" % index
     var crown_mesh := SphereMesh.new()
     crown_mesh.radius = 0.24
     crown_mesh.height = 0.52
@@ -140,7 +140,7 @@ func _build_m4_psittacus_bed(pos: Vector3) -> void:
         var x: float = -1.05 + float(i % 4) * 0.70
         var z: float = -0.45 + float(i / 4) * 0.82 + float(i % 2) * 0.12
         var bulb := MeshInstance3D.new()
-        bulb.name = "M4PsittacusBulb"
+        bulb.name = "M4PsittacusBulb_%02d" % i
         var mesh := SphereMesh.new()
         mesh.radius = 0.22 + float(i % 2) * 0.04
         mesh.height = 0.58
@@ -166,7 +166,7 @@ func _build_m4_pampin_gallery(pos: Vector3, length: float) -> void:
     for i in range(11):
         var x: float = float(i) * length / 10.0
         var leaf := MeshInstance3D.new()
-        leaf.name = "M4PampinLeaf"
+        leaf.name = "M4PampinLeaf_%02d" % i
         var leaf_mesh := SphereMesh.new()
         leaf_mesh.radius = 0.18
         leaf_mesh.height = 0.38
@@ -184,7 +184,7 @@ func _build_m4_pampin_gallery(pos: Vector3, length: float) -> void:
 
         if i % 3 == 1:
             var pod := MeshInstance3D.new()
-            pod.name = "M4PampinPod"
+            pod.name = "M4PampinPod_%02d" % i
             var pod_mesh := SphereMesh.new()
             pod_mesh.radius = 0.13
             pod_mesh.height = 0.42
