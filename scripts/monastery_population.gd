@@ -7,6 +7,11 @@ const LORE = preload("res://scripts/lore_object.gd")
 const INTERIOR_ORIGIN := Vector3(-108.0, 0.0, 0.0)
 
 func _ready() -> void:
+    # Main loads an existing save in its own _ready(). Defer population so
+    # side-quest state and pickups are built from the restored data.
+    call_deferred("_initialize_population")
+
+func _initialize_population() -> void:
     _ensure_side_quest()
     _spawn_residents()
     _spawn_missing_copy()
