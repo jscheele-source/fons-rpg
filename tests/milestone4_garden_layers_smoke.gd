@@ -26,10 +26,10 @@ func _run_test() -> void:
         _fail("Milestone 4: one or more botanical layers are missing.")
         return
 
-    var flora_blooms := _count_named(main, "M4FloraBloom")
+    var flora_blooms := _count_prefix(main, "M4FloraBloom_")
     var tamdin_clusters := _count_prefix(main, "M4TamdinCluster_")
-    var psittacus_bulbs := _count_named(main, "M4PsittacusBulb")
-    var pampin_leaves := _count_named(main, "M4PampinLeaf")
+    var psittacus_bulbs := _count_prefix(main, "M4PsittacusBulb_")
+    var pampin_leaves := _count_prefix(main, "M4PampinLeaf_")
     if flora_blooms < 14:
         _fail("Milestone 4: low flora layer is too sparse; expected at least 14 blooms, found %d." % flora_blooms)
         return
@@ -52,12 +52,6 @@ func _run_test() -> void:
 
     print("Milestone 4 smoke test passed: low, mid-height, bulb, and overhead alien garden layers are present without new collision snags.")
     get_tree().quit(0)
-
-func _count_named(root: Node, wanted: String) -> int:
-    var total := 1 if str(root.name) == wanted else 0
-    for child in root.get_children():
-        total += _count_named(child, wanted)
-    return total
 
 func _count_prefix(root: Node, prefix: String) -> int:
     var total := 1 if str(root.name).begins_with(prefix) else 0
