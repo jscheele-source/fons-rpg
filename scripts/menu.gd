@@ -36,6 +36,89 @@ const BACKGROUND_TEXT := {
     "Drifter": "You learned to read strangers quickly and keep moving when a place became dangerous. +5 Athletics, +5 Speechcraft.",
 }
 
+const ATTRIBUTES := ["Strength", "Endurance", "Agility", "Willpower", "Intellect", "Presence"]
+const SKILLS := ["Blade", "Athletics", "Meditation", "Flamecraft", "Speechcraft", "Technology", "Lore"]
+
+const APTITUDES := {
+    "Militant": {
+        "attribute": "Strength",
+        "skills": ["Blade", "Athletics", "Flamecraft"],
+        "description": "The record suggests direct action, physical discipline, and the forceful use of the inner flame.",
+    },
+    "Warden": {
+        "attribute": "Endurance",
+        "skills": ["Blade", "Meditation", "Athletics"],
+        "description": "The record suggests patience under pressure, defensive discipline, and steadiness in difficult places.",
+    },
+    "Contemplative": {
+        "attribute": "Willpower",
+        "skills": ["Meditation", "Flamecraft", "Lore"],
+        "description": "The record suggests unusual inward attention and a natural inclination toward deliberate control of the inner flame.",
+    },
+    "Scholar": {
+        "attribute": "Intellect",
+        "skills": ["Lore", "Technology", "Meditation"],
+        "description": "The record suggests a habit of understanding systems before acting, whether the system is a machine, a text, or a doctrine.",
+    },
+    "Envoy": {
+        "attribute": "Presence",
+        "skills": ["Speechcraft", "Lore", "Meditation"],
+        "description": "The record suggests sensitivity to people, institutions, and the meanings hidden behind what is said aloud.",
+    },
+    "Wayfarer": {
+        "attribute": "Agility",
+        "skills": ["Athletics", "Technology", "Speechcraft"],
+        "description": "The record suggests adaptability, quick judgment, and comfort moving through unfamiliar places without much guidance.",
+    },
+}
+
+const APTITUDE_QUESTIONS := [
+    {
+        "prompt": "A sealed door fails during a storm. Nobody present knows whether the mechanism or the stone around it is older. What do you do first?",
+        "options": [
+            ["Force it before the weather worsens.", "Militant"],
+            ["Brace the passage and make sure nobody is trapped.", "Warden"],
+            ["Become still and feel for the current moving through it.", "Contemplative"],
+            ["Open the housing and determine what actually failed.", "Scholar"],
+            ["Find whoever last used it and ask what they noticed.", "Envoy"],
+            ["Look for another route before committing to the door.", "Wayfarer"],
+        ],
+    },
+    {
+        "prompt": "In a crowded port, a stranger loudly accuses you of taking something that is plainly still in their hand. What matters first?",
+        "options": [
+            ["Make it clear that threatening me was a mistake.", "Militant"],
+            ["Stay where I am until the confusion burns itself out.", "Warden"],
+            ["Keep my temper from becoming part of the problem.", "Contemplative"],
+            ["Work out why they chose me before I answer.", "Scholar"],
+            ["Make the crowd laugh before the accusation can harden.", "Envoy"],
+            ["Leave. Being right is not worth missing a shuttle.", "Wayfarer"],
+        ],
+    },
+    {
+        "prompt": "You wake from a dream in which a familiar voice calls your name from beneath a floor of black stone. By morning the details are already fading. What do you do?",
+        "options": [
+            ["If there is a place beneath the stone, I would go armed.", "Militant"],
+            ["Tell a superior before curiosity becomes secrecy.", "Warden"],
+            ["Return to meditation and try to hear the voice again.", "Contemplative"],
+            ["Write down every detail before memory edits it.", "Scholar"],
+            ["Tell someone I trust and listen to what the dream means to them.", "Envoy"],
+            ["Find the floor. Dreams are easier to judge when standing over them.", "Wayfarer"],
+        ],
+    },
+    {
+        "prompt": "A teacher tells you that the inner flame becomes strongest when a person learns what they lack. Which answer comes easiest?",
+        "options": [
+            ["Strength is learned by spending it.", "Militant"],
+            ["What I lack is the ability to endure without changing.", "Warden"],
+            ["Most people cannot hear themselves clearly enough to know what they lack.", "Contemplative"],
+            ["I would rather know whether the teacher can prove that claim.", "Scholar"],
+            ["What we lack is often visible to other people first.", "Envoy"],
+            ["If I knew what I lacked, I would already be looking for it.", "Wayfarer"],
+        ],
+    },
+]
+
 const GOLD := Color(0.88, 0.77, 0.56)
 const GOLD_BRIGHT := Color(0.98, 0.88, 0.66)
 const BROWN := Color(0.10, 0.075, 0.050, 0.96)
@@ -48,6 +131,11 @@ var species_description: Label
 var background_option: OptionButton
 var background_description: Label
 var draft_profile := {}
+var aptitude_scores: Dictionary = {}
+var aptitude_question_index := 0
+var favored_attribute_option: OptionButton
+var major_skill_options: Array[OptionButton] = []
+var custom_error: Label
 
 func _ready() -> void:
     Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
@@ -87,7 +175,6 @@ func _build_frame() -> void:
     bg.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
     add_child(bg)
 
-    # Large flat bands mimic an old painted menu backdrop without importing art assets.
     var haze := ColorRect.new()
     haze.color = Color(0.18, 0.135, 0.085, 0.20)
     haze.anchor_left = 0.0
@@ -114,7 +201,7 @@ func _build_frame() -> void:
     content.offset_top = -315
     content.offset_bottom = 315
     content.alignment = BoxContainer.ALIGNMENT_CENTER
-    content.add_theme_constant_override("separation", 14)
+    content.add_theme_constant_override("separation", 12)
     add_child(content)
 
 func _clear() -> void:
@@ -145,8 +232,8 @@ func _body(text: String) -> Label:
 func _button(text: String, callback: Callable) -> Button:
     var button := Button.new()
     button.text = text
-    button.custom_minimum_size = Vector2(340, 46)
-    button.add_theme_font_size_override("font_size", 18)
+    button.custom_minimum_size = Vector2(340, 43)
+    button.add_theme_font_size_override("font_size", 17)
     button.add_theme_color_override("font_color", GOLD)
     button.add_theme_color_override("font_hover_color", GOLD_BRIGHT)
     button.add_theme_stylebox_override("normal", _panel_style(BROWN))
@@ -176,7 +263,7 @@ func _show_title() -> void:
     continue_button.disabled = not FileAccess.file_exists("user://fons_save.json")
     content.add_child(continue_button)
     content.add_child(_button("ABOUT THIS BUILD", _show_about))
-    var version := _body("Prototype 0.4 — Ash & Stone")
+    var version := _body("Prototype 0.5 — The Initiate's Measure")
     version.add_theme_font_size_override("font_size", 13)
     content.add_child(version)
 
@@ -199,7 +286,7 @@ func _show_character_creation() -> void:
     name_edit = LineEdit.new()
     name_edit.placeholder_text = "Enter your name"
     name_edit.text = "Initiate"
-    name_edit.custom_minimum_size = Vector2(540, 42)
+    name_edit.custom_minimum_size = Vector2(540, 40)
     _style_input(name_edit)
     content.add_child(name_edit)
 
@@ -209,7 +296,7 @@ func _show_character_creation() -> void:
     species_option = OptionButton.new()
     for species in SPECIES:
         species_option.add_item(species)
-    species_option.custom_minimum_size = Vector2(540, 42)
+    species_option.custom_minimum_size = Vector2(540, 40)
     _style_input(species_option)
     species_option.item_selected.connect(_update_species_text)
     content.add_child(species_option)
@@ -224,7 +311,7 @@ func _show_character_creation() -> void:
     background_option = OptionButton.new()
     for background in BACKGROUNDS:
         background_option.add_item(background)
-    background_option.custom_minimum_size = Vector2(540, 42)
+    background_option.custom_minimum_size = Vector2(540, 40)
     _style_input(background_option)
     background_option.item_selected.connect(_update_background_text)
     content.add_child(background_option)
@@ -251,10 +338,17 @@ func _record_basic_profile() -> void:
         "species": SPECIES[species_option.selected],
         "background": BACKGROUNDS[background_option.selected],
         "answers": [],
+        "aptitude": "",
+        "favored_attribute": "",
+        "major_skills": [],
     }
-    _show_question()
+    aptitude_scores = {}
+    for aptitude in APTITUDES.keys():
+        aptitude_scores[aptitude] = 0
+    aptitude_question_index = 0
+    _show_worldview_question()
 
-func _show_question() -> void:
+func _show_worldview_question() -> void:
     _clear()
     content.add_child(_heading("A QUESTION", 32))
     content.add_child(_rule())
@@ -263,20 +357,141 @@ func _show_question() -> void:
     question.add_theme_font_size_override("font_size", 23)
     question.add_theme_color_override("font_color", GOLD_BRIGHT)
     content.add_child(question)
-    content.add_child(_button("Justice.", func(): _answer_question("Justice")))
-    content.add_child(_button("Peace.", func(): _answer_question("Peace")))
-    content.add_child(_button("I do not accept the choice.", func(): _answer_question("Refusal")))
-    content.add_child(_button("I don't know.", func(): _answer_question("Uncertain")))
+    content.add_child(_button("Justice.", func(): _answer_worldview("Justice")))
+    content.add_child(_button("Peace.", func(): _answer_worldview("Peace")))
+    content.add_child(_button("I do not accept the choice.", func(): _answer_worldview("Refusal")))
+    content.add_child(_button("I don't know.", func(): _answer_worldview("Uncertain")))
 
-func _answer_question(answer: String) -> void:
-    draft_profile["answers"] = [answer]
+func _answer_worldview(answer: String) -> void:
+    draft_profile["answers"].append(answer)
+    _show_aptitude_question()
+
+func _show_aptitude_question() -> void:
+    if aptitude_question_index >= APTITUDE_QUESTIONS.size():
+        _calculate_aptitude()
+        return
+
+    _clear()
+    content.add_child(_heading("THE INITIATE'S MEASURE", 30))
+    content.add_child(_rule())
+    var counter := _body("Question %d of %d" % [aptitude_question_index + 1, APTITUDE_QUESTIONS.size()])
+    counter.add_theme_font_size_override("font_size", 13)
+    content.add_child(counter)
+
+    var q: Dictionary = APTITUDE_QUESTIONS[aptitude_question_index]
+    var prompt := _body(str(q["prompt"]))
+    prompt.add_theme_font_size_override("font_size", 19)
+    prompt.add_theme_color_override("font_color", GOLD_BRIGHT)
+    content.add_child(prompt)
+
+    var options: Array = q["options"]
+    for option in options:
+        var answer_text := str(option[0])
+        var aptitude := str(option[1])
+        content.add_child(_button(answer_text, _answer_aptitude.bind(answer_text, aptitude)))
+
+func _answer_aptitude(answer_text: String, aptitude: String) -> void:
+    draft_profile["answers"].append(answer_text)
+    aptitude_scores[aptitude] = int(aptitude_scores.get(aptitude, 0)) + 1
+    aptitude_question_index += 1
+    _show_aptitude_question()
+
+func _calculate_aptitude() -> void:
+    var best := "Militant"
+    var best_score := -1
+    for aptitude in ["Militant", "Warden", "Contemplative", "Scholar", "Envoy", "Wayfarer"]:
+        var score := int(aptitude_scores.get(aptitude, 0))
+        if score > best_score:
+            best = aptitude
+            best_score = score
+
+    draft_profile["aptitude"] = best
+    draft_profile["favored_attribute"] = str(APTITUDES[best]["attribute"])
+    draft_profile["major_skills"] = APTITUDES[best]["skills"].duplicate()
+    _show_aptitude_result()
+
+func _show_aptitude_result() -> void:
+    _clear()
+    var aptitude := str(draft_profile["aptitude"])
+    var data: Dictionary = APTITUDES[aptitude]
+    content.add_child(_heading("APTITUDE: %s" % aptitude.to_upper(), 29))
+    content.add_child(_rule())
+    content.add_child(_body(str(data["description"])))
+    content.add_child(_body("Favored attribute: %s (+10)\nFavored skills: %s (+5), %s (+5), %s (+5)" % [
+        draft_profile["favored_attribute"],
+        draft_profile["major_skills"][0],
+        draft_profile["major_skills"][1],
+        draft_profile["major_skills"][2],
+    ]))
+    content.add_child(_body("The examiner makes the notation in the margin rather than the main record. “A tendency is not a sentence,” they say."))
+    content.add_child(_button("ACCEPT RECOMMENDATION", _show_review))
+    content.add_child(_button("REVISE THE RECORD", _show_manual_specialization))
+
+func _show_manual_specialization() -> void:
+    _clear()
+    content.add_child(_heading("REVISE THE RECORD", 30))
+    content.add_child(_rule())
+    content.add_child(_body("Choose one favored attribute and three different favored skills. This changes only where you begin, not what you may eventually learn."))
+
+    favored_attribute_option = OptionButton.new()
+    for attribute in ATTRIBUTES:
+        favored_attribute_option.add_item(attribute)
+    favored_attribute_option.custom_minimum_size = Vector2(540, 40)
+    _style_input(favored_attribute_option)
+    content.add_child(favored_attribute_option)
+
+    major_skill_options.clear()
+    for i in range(3):
+        var option := OptionButton.new()
+        for skill in SKILLS:
+            option.add_item(skill)
+        option.selected = min(i, SKILLS.size() - 1)
+        option.custom_minimum_size = Vector2(540, 40)
+        _style_input(option)
+        major_skill_options.append(option)
+        content.add_child(option)
+
+    custom_error = _body("")
+    custom_error.add_theme_font_size_override("font_size", 14)
+    custom_error.add_theme_color_override("font_color", Color(0.92, 0.52, 0.38))
+    content.add_child(custom_error)
+    content.add_child(_button("ENTER REVISIONS", _accept_manual_specialization))
+    content.add_child(_button("KEEP RECOMMENDATION", _show_aptitude_result))
+
+func _accept_manual_specialization() -> void:
+    var chosen_skills: Array[String] = []
+    for option in major_skill_options:
+        chosen_skills.append(SKILLS[option.selected])
+    var unique := {}
+    for skill in chosen_skills:
+        unique[skill] = true
+    if unique.size() != 3:
+        custom_error.text = "The registry requires three different favored skills."
+        return
+
+    draft_profile["aptitude"] = "Unclassified"
+    draft_profile["favored_attribute"] = ATTRIBUTES[favored_attribute_option.selected]
+    draft_profile["major_skills"] = chosen_skills
     _show_review()
 
 func _show_review() -> void:
     _clear()
     content.add_child(_heading("THE RECORD", 32))
     content.add_child(_rule())
-    content.add_child(_body("Name: %s\nSpecies: %s\nBackground: %s\n\nYour final answer is entered without comment." % [draft_profile["name"], draft_profile["species"], draft_profile["background"]]))
+    var aptitude := str(draft_profile.get("aptitude", "Unclassified"))
+    var favored := str(draft_profile.get("favored_attribute", ""))
+    var majors: Array = draft_profile.get("major_skills", [])
+    var skill_line := ""
+    if majors.size() >= 3:
+        skill_line = "%s, %s, %s" % [majors[0], majors[1], majors[2]]
+    content.add_child(_body("Name: %s\nSpecies: %s\nBackground: %s\nAptitude: %s\nFavored attribute: %s\nFavored skills: %s\n\nThe final page is left unsigned until you accept the summons." % [
+        draft_profile["name"],
+        draft_profile["species"],
+        draft_profile["background"],
+        aptitude,
+        favored,
+        skill_line,
+    ]))
     content.add_child(_button("ACCEPT THE SUMMONS", _begin_new_game))
     content.add_child(_button("START OVER", _show_character_creation))
 
