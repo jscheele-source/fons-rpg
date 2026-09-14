@@ -62,6 +62,10 @@ jobs:
         shell: bash
         run: godot --headless --path . res://tests/MonasteryRouteSmoke.tscn
 
+      - name: Smoke-test courtyard garden route
+        shell: bash
+        run: godot --headless --path . res://tests/GardenRouteSmoke.tscn
+
       - name: Export browser build
         shell: bash
         run: |
