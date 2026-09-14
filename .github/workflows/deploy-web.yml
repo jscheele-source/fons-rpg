@@ -87,23 +87,10 @@ jobs:
           mv build/web/index.pck "build/web/fons-${BUILD_TAG}.pck"
           mv build/web/index.wasm "build/web/fons-${BUILD_TAG}.wasm"
 
-          python3 - <<'PY'
-          import os
-          from pathlib import Path
-
-          tag = os.environ["GITHUB_SHA"][:12]
-          path = Path("build/web/index.html")
-          html = path.read_text()
-          html = html.replace('src="index.js"', f'src="fons-{tag}.js"')
-          html = html.replace('"executable":"index"', f'"executable":"fons-{tag}"')
-          html = html.replace('"index.pck":', f'"fons-{tag}.pck":')
-          html = html.replace('"index.wasm":', f'"fons-{tag}.wasm":')
-          html = html.replace(
-              '<meta charset="utf-8">',
-              '<meta charset="utf-8">\n\t\t<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">\n\t\t<meta http-equiv="Pragma" content="no-cache">\n\t\t<meta http-equiv="Expires" content="0">'
-          )
-          path.write_text(html)
-          PY
+          sed -i "s/src=\"index.js\"/src=\"fons-${BUILD_TAG}.js\"/" build/web/index.html
+          sed -i "s/\"executable\":\"index\"/\"executable\":\"fons-${BUILD_TAG}\"/" build/web/index.html
+          sed -i "s/\"index.pck\":/\"fons-${BUILD_TAG}.pck\":/" build/web/index.html
+          sed -i "s/\"index.wasm\":/\"fons-${BUILD_TAG}.wasm\":/" build/web/index.html
 
           # Compatibility aliases keep an already-open older tab from receiving
           # a 404 while new page loads use the unique package names above.
