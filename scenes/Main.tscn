@@ -10,7 +10,7 @@
 [ext_resource type="Script" path="res://scripts/monastery_population_m2.gd" id="8_population"]
 [ext_resource type="Script" path="res://scripts/monastery_route_repair.gd" id="9_route_repair"]
 [ext_resource type="Script" path="res://scripts/interior_polish_m2.gd" id="10_polish"]
-[ext_resource type="Script" path="res://scripts/garden_expansion_v2.gd" id="11_garden"]
+[ext_resource type="Script" path="res://scripts/garden_expansion_v2b.gd" id="11_garden"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape_player"]
 radius = 0.45
