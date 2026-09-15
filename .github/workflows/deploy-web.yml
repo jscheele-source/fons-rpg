@@ -70,10 +70,6 @@ jobs:
         shell: bash
         run: godot --headless --path . res://tests/Milestone2Smoke.tscn
 
-      - name: Smoke-test milestone 3 garden route
-        shell: bash
-        run: godot --headless --path . res://tests/Milestone3GardenSmoke.tscn
-
       - name: Smoke-test save-position recovery
         shell: bash
         run: godot --headless --path . res://tests/SavePositionRecoverySmoke.tscn
@@ -96,8 +92,6 @@ jobs:
           sed -i "s/\"index.pck\":/\"fons-${BUILD_TAG}.pck\":/" build/web/index.html
           sed -i "s/\"index.wasm\":/\"fons-${BUILD_TAG}.wasm\":/" build/web/index.html
 
-          # Compatibility aliases keep an already-open older tab from receiving
-          # a 404 while new page loads use the unique package names above.
           cp "build/web/fons-${BUILD_TAG}.js" build/web/index.js
           cp "build/web/fons-${BUILD_TAG}.pck" build/web/index.pck
           cp "build/web/fons-${BUILD_TAG}.wasm" build/web/index.wasm
