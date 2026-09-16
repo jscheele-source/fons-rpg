@@ -35,11 +35,11 @@ func _ready() -> void:
     add_child(visual)
 
 func _physics_process(delta: float) -> void:
-    var step := min(SPEED * delta, MAX_TRAVEL - distance_travelled)
+    var step: float = minf(SPEED * delta, MAX_TRAVEL - distance_travelled)
     if step <= 0.0:
         queue_free()
         return
-    var endpoint := global_position + direction * step
+    var endpoint: Vector3 = global_position + direction * step
     var query := PhysicsRayQueryParameters3D.create(global_position, endpoint)
     query.collision_mask = 1
     if is_instance_valid(caster):
