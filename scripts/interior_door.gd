@@ -1,6 +1,8 @@
 extends StaticBody3D
 class_name InteriorDoor
 
+const CONDUCT = preload("res://scripts/conduct_rules.gd")
+
 var display_name: String = "Door"
 var destination: Vector3 = Vector3.ZERO
 var arrival_yaw: float = 0.0
@@ -12,7 +14,6 @@ var required_quest_state: String = "completed"
 var locked_message: String = "The door does not answer you."
 
 func _ready() -> void:
-    # The main dwelling is not open to arrivals until Varro enters them among the novices.
     if display_name == "Main Monastic Dwelling" and required_quest_id == "":
         required_quest_id = "first_steps"
         locked_message = "The amber strip flashes once. Your novice seal does not answer it."
@@ -50,6 +51,8 @@ func _ready() -> void:
     add_child(strip)
 
 func _is_locked() -> bool:
+    if display_name == "Main Monastic Dwelling" and CONDUCT.access_suspended():
+        return true
     if required_quest_id == "":
         return false
     if not GameState.quests.has(required_quest_id):
@@ -62,6 +65,9 @@ func get_interaction_text() -> String:
     return "Enter %s" % display_name
 
 func interact(player) -> void:
+    if display_name == "Main Monastic Dwelling" and CONDUCT.access_suspended():
+        GameState.message_requested.emit("The seal refuses you: monastery access is suspended. Report to Varro or finish your supervised service.")
+        return
     if _is_locked():
         GameState.message_requested.emit(locked_message)
         return

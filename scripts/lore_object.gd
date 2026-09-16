@@ -1,6 +1,7 @@
 extends StaticBody3D
 class_name LoreObject
 
+const CONDUCT = preload("res://scripts/conduct_rules.gd")
 var title := "Terminal"
 var body := ""
 var prompt := "Read"
@@ -27,8 +28,12 @@ func _ready() -> void:
     add_child(visual)
 
 func get_interaction_text() -> String:
+    if title == "Annex Terminal 3" and CONDUCT.service_required("annex") and not CONDUCT.service_done("annex"):
+        return "Audit annex safety record"
     return "%s %s" % [prompt, title]
 
 func interact(player) -> void:
     GameState.add_skill_xp("Technology", 0.8)
+    if title == "Annex Terminal 3" and CONDUCT.service_required("annex"):
+        CONDUCT.complete_service_task("annex")
     player.open_text(title, body)

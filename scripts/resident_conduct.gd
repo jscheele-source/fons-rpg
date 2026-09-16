@@ -9,6 +9,11 @@ func _ready() -> void:
 func get_conduct_id() -> String:
     return "resident_" + resident_id
 
+func get_interaction_text() -> String:
+    if CONDUCT.duty_blocked():
+        return "Speak with %s (duties suspended)" % display_name
+    return super.get_interaction_text()
+
 func take_damage(_damage: float, source) -> void:
     if source is Node3D:
         var away: Vector3 = global_position - source.global_position
@@ -25,7 +30,14 @@ func take_damage(_damage: float, source) -> void:
 func get_dialogue() -> Dictionary:
     var person_id := get_conduct_id()
     if CONDUCT.pending():
-        return {"speaker": display_name, "text": "There is an assault report with Varro. I won't discuss duties until he has heard you.", "choices": [{"text": "Goodbye.", "action": "close"}]}
+        var statement := "There is an assault report with Varro. I won't discuss duties until he has heard you."
+        if CONDUCT.tier() >= 3:
+            statement = "You're under exclusion review. Get away from my table. Varro can hear your explanation."
+        elif CONDUCT.tier() >= 2:
+            statement = "Your dwelling seal is suspended. Speak to Varro. I will not give you work."
+        return {"speaker": display_name, "text": statement, "choices": [{"text": "Leave.", "action": "close"}]}
+    if CONDUCT.service_active():
+        return {"speaker": display_name, "text": "Finish Varro's supervised courtyard service before returning to the monastery's ordinary duties.", "choices": [{"text": "Leave.", "action": "close"}]}
     if current_page == "conduct_apology":
         return {"speaker": display_name, "text": "All right. I heard the apology. Give me some room.", "choices": [{"text": "Goodbye.", "action": "close"}]}
     var dialogue: Dictionary = super.get_dialogue()
@@ -38,7 +50,7 @@ func get_dialogue() -> Dictionary:
     return dialogue
 
 func choose(action: String) -> void:
-    if CONDUCT.pending():
+    if CONDUCT.duty_blocked():
         return
     if action == "conduct_apologize":
         if CONDUCT.apologize(get_conduct_id()):

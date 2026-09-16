@@ -2,12 +2,32 @@ extends "res://scripts/hud.gd"
 
 const CONDUCT = preload("res://scripts/conduct_rules.gd")
 
-# Journal-only text; does not create any meshes, 3-D nodes or new UI panels.
+# The case file lives inside the existing journal: no new 3D or UI scene nodes.
 func _refresh_journal() -> void:
     super._refresh_journal()
-    var section := "\n\n[font_size=19][b]Monastery Conduct[/b][/font_size]\n"
+    var section := "\n\n[font_size=19][b]Monastery Conduct: Case File[/b][/font_size]\n"
     section += CONDUCT.status_text() + "\n"
-    section += "Recorded assaults: %d\n" % int(GameState.world_flags.get("conduct_total", 0))
+    section += "Recorded assaults: %d | Hearings: %d | Service records: %d\n" % [int(GameState.world_flags.get("conduct_total", 0)), int(GameState.world_flags.get("conduct_resolutions", 0)), int(GameState.world_flags.get("conduct_service_completed", 0))]
+    if CONDUCT.pending():
+        section += "Latest report: %s\n" % str(GameState.world_flags.get("conduct_last_victim", "resident"))
+        section += "Restitution at this hearing: %d credits (or disciplinary resolution).\n" % CONDUCT.fine_due()
+        var heard: Array = GameState.world_flags.get("conduct_latest_witnesses", [])
+        if heard.is_empty():
+            section += "No other nearby witness recorded.\n"
+        else:
+            var names: Array[String] = []
+            for person_id in heard:
+                names.append(str(CONDUCT.NAMES.get(str(person_id), str(person_id))))
+            section += "Nearby witnesses: %s\n" % ", ".join(names)
+    if CONDUCT.service_active():
+        section += "[b]Supervised restitution — outdoor checklist[/b]\n"
+        for task_id in ["post", "annex", "drill"]:
+            if CONDUCT.service_required(task_id):
+                var checked := "[DONE]" if CONDUCT.service_done(task_id) else "[TODO]"
+                section += "%s %s\n" % [checked, CONDUCT.SERVICE_TASKS[task_id]]
+        if CONDUCT.service_required("drill") and not CONDUCT.service_done("drill"):
+            section += "Controlled strikes: %d/3\n" % int(GameState.world_flags.get("conduct_practice_hits", 0))
+        section += "Return to Preceptor Varro for sign-off.\n" if CONDUCT.service_ready() else "No dwelling access until the checklist is complete and signed.\n"
     var opinions: Dictionary = GameState.world_flags.get("conduct_opinions", {})
     var witnesses: Dictionary = GameState.world_flags.get("conduct_witnesses", {})
     for person_id in CONDUCT.NAMES.keys():
@@ -18,6 +38,6 @@ func _refresh_journal() -> void:
         var witnessed: int = int(witnesses.get(person_id, 0))
         section += "%s: %s" % [CONDUCT.NAMES[person_id], mood]
         if witnessed > 0:
-            section += " (witnessed %d)" % witnessed
+            section += " (heard %d incident(s))" % witnessed
         section += "\n"
     journal_text.text += section

@@ -9,12 +9,22 @@ func _ready() -> void:
 func get_conduct_id() -> String:
     return "elder_davian"
 
+func get_interaction_text() -> String:
+    if CONDUCT.duty_blocked():
+        return "Speak with Elder Davian (training suspended)"
+    return super.get_interaction_text()
+
 func take_damage(_damage: float, source) -> void:
     CONDUCT.record_assault(self, source, get_conduct_id(), "Davian takes a step back and calls for Varro.")
 
 func get_dialogue() -> Dictionary:
-    if CONDUCT.pending():
-        return {"speaker": display_name, "text": "Your violence has been entered in the register. Speak to Varro; we will not train while this is unsettled.", "choices": [{"text": "Goodbye.", "action": "close"}]}
+    if CONDUCT.duty_blocked():
+        var message := "Your violence is on record. Varro must hear the report before we can train."
+        if CONDUCT.service_active():
+            message = "You have supervised restitution to complete. Return to me after Varro signs the ledger."
+        if CONDUCT.tier() >= 3 and CONDUCT.pending():
+            message = "Your exclusion review comes first. I will not train you while the monastery is protecting its residents."
+        return {"speaker": display_name, "text": message, "choices": [{"text": "Leave.", "action": "close"}]}
     if current_page == "conduct_apology":
         return {"speaker": display_name, "text": "An apology is a beginning, not an undoing. We will see what follows.", "choices": [{"text": "Goodbye.", "action": "close"}]}
     var dialogue: Dictionary = super.get_dialogue()
@@ -27,7 +37,7 @@ func get_dialogue() -> Dictionary:
     return dialogue
 
 func choose(action: String) -> void:
-    if CONDUCT.pending():
+    if CONDUCT.duty_blocked():
         return
     if action == "conduct_apologize":
         if CONDUCT.apologize(get_conduct_id()):
