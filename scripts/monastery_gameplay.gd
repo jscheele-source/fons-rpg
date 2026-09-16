@@ -1,6 +1,6 @@
 extends Node3D
 
-const DAVIAN = preload("res://scripts/davian_conduct.gd")
+const DAVIAN = preload("res://scripts/davian_conduct_response.gd")
 const REST_BED = preload("res://scripts/rest_bed.gd")
 const TRAINING = preload("res://scripts/training_station.gd")
 const LORE = preload("res://scripts/lore_object.gd")
