@@ -1,13 +1,19 @@
 extends "res://scripts/hud.gd"
 
 const CONDUCT = preload("res://scripts/conduct_rules.gd")
+const ALERT = preload("res://scripts/conduct_alert.gd")
 
-# The case file lives inside the existing journal: no new 3D or UI scene nodes.
+# Case file in the existing journal: no additional meshes, panels or world nodes.
 func _refresh_journal() -> void:
     super._refresh_journal()
     var section := "\n\n[font_size=19][b]Monastery Conduct: Case File[/b][/font_size]\n"
     section += CONDUCT.status_text() + "\n"
+    if ALERT.active():
+        section += "[b]ACTIVE RESPONSE[/b] — Varro has been called. Speak to him; stand down or face a refusal charge.\n"
+        if ALERT.defied():
+            section += "You refused the order. The disciplinary hearing is now mandatory.\n"
     section += "Recorded assaults: %d | Hearings: %d | Service records: %d\n" % [int(GameState.world_flags.get("conduct_total", 0)), int(GameState.world_flags.get("conduct_resolutions", 0)), int(GameState.world_flags.get("conduct_service_completed", 0))]
+    section += "Complied with orders: %d | Refused orders: %d\n" % [int(GameState.world_flags.get("conduct_compliances", 0)), int(GameState.world_flags.get("conduct_defiances", 0))]
     if CONDUCT.pending():
         section += "Latest report: %s\n" % str(GameState.world_flags.get("conduct_last_victim", "resident"))
         section += "Restitution at this hearing: %d credits (or disciplinary resolution).\n" % CONDUCT.fine_due()
