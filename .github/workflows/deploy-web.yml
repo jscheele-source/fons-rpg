@@ -82,6 +82,10 @@ jobs:
         shell: bash
         run: godot --headless --path . res://tests/ConductEscalationSmoke.tscn
 
+      - name: Smoke-test active conduct response and compliance
+        shell: bash
+        run: godot --headless --path . res://tests/ConductResponseSmoke.tscn
+
       - name: Export browser build with cache-busted package names
         shell: bash
         run: |
