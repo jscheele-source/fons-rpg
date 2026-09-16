@@ -13,8 +13,9 @@ func _run() -> void:
     add_child(main)
     for _i in range(8):
         await get_tree().process_frame
-    if str(main.get_script().resource_path) != "res://scripts/world_m2.gd" or main.get_node_or_null("WestBotanicalCloister") != null:
-        _fail("Response: baseline world changed or garden returned.")
+    var world_script: Script = main.get_script()
+    if world_script == null or world_script.get_base_script() == null or world_script.get_base_script().resource_path != "res://scripts/world_m2.gd" or main.get_node_or_null("WestBotanicalCloister") != null or main.get_node_or_null("M4GardenLayers") != null:
+        _fail("Response: baseline must directly inherit M2 without gardens.")
         return
     var player = main.get_node_or_null("Player")
     var varro = _named(main, "Preceptor Varro")
@@ -101,7 +102,7 @@ func _run() -> void:
     if ALERT.active() or ALERT.defied() or int(GameState.world_flags.get("conduct_defiances", 0)) != 0:
         _fail("Response: alerts leaked into a new game.")
         return
-    print("Conduct response smoke test passed: baseline, alarm, witness refusal, Varro movement, compliance, defiance, hearing, interior report, save and reset.")
+    print("Conduct response smoke test passed: M2 inheritance, alarm, witness refusal, Varro movement, compliance, defiance, hearing, report, save and reset.")
     get_tree().quit(0)
 
 func _named(root: Node, wanted: String):
