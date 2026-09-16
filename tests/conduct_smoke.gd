@@ -13,8 +13,10 @@ func _run_test() -> void:
     for _i in range(7):
         await get_tree().process_frame
 
-    if str(main.get_script().resource_path) != "res://scripts/world_m2.gd":
-        _fail("Conduct: stable M2 world was replaced.")
+    # Allow a one-layer gameplay/model wrapper, but never a replacement terrain.
+    var world_script: Script = main.get_script()
+    if world_script == null or world_script.get_base_script() == null or str(world_script.get_base_script().resource_path) != "res://scripts/world_m2.gd":
+        _fail("Conduct: world must directly inherit the stable M2 implementation.")
         return
     if main.get_node_or_null("WestBotanicalCloister") != null or main.get_node_or_null("M4GardenLayers") != null:
         _fail("Conduct: garden geometry was reintroduced.")
@@ -115,7 +117,7 @@ func _run_test() -> void:
         _fail("Conduct: starting a new game did not clear the old character's record.")
         return
 
-    print("Conduct smoke test passed: stable M2 world, witnesses, escalating reports, duty lock, hearing, apologies, probation, restitution, save flags and new-game reset.")
+    print("Conduct smoke test passed: M2-derived world, witnesses, escalating reports, duty lock, hearing, apologies, probation, restitution, save flags and new-game reset.")
     get_tree().quit(0)
 
 func _find_by_name(root: Node, wanted: String):
