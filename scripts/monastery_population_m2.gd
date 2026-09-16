@@ -1,6 +1,6 @@
 extends "res://scripts/monastery_population.gd"
 
-const RESIDENT_M2 = preload("res://scripts/monastery_resident_m2.gd")
+const RESIDENT_M2 = preload("res://scripts/resident_conduct.gd")
 
 func _spawn_residents() -> void:
     var archivist = RESIDENT_M2.new()

@@ -1,6 +1,6 @@
 extends Node3D
 
-const DAVIAN = preload("res://scripts/davian_npc.gd")
+const DAVIAN = preload("res://scripts/davian_conduct.gd")
 const REST_BED = preload("res://scripts/rest_bed.gd")
 const TRAINING = preload("res://scripts/training_station.gd")
 const LORE = preload("res://scripts/lore_object.gd")
@@ -19,7 +19,6 @@ func _spawn_davian() -> void:
     add_child(davian)
 
 func _spawn_assigned_bed() -> void:
-    # Middle dormitory cell, laid over the existing bed geometry.
     var bed = REST_BED.new()
     bed.position = INTERIOR_ORIGIN + Vector3(10.4, 0.84, 0.2)
     add_child(bed)
@@ -52,4 +51,3 @@ func _spawn_readables() -> void:
     library_note.object_color = Color(0.18, 0.19, 0.17)
     library_note.body = "RETURN COPIES TO THE SHELF FROM WHICH THEY WERE TAKEN.\n\nPhysical volumes, copied scrolls, and local datapads are all catalogued separately. A handwritten addition beneath the notice reads: [i]This does not mean the three catalogues agree.[/i]"
     library_note.position = INTERIOR_ORIGIN + Vector3(-10.2, 0.0, 3.7)
-    add_child(library_note)

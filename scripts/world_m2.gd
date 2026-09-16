@@ -1,9 +1,8 @@
 extends "res://scripts/world_m1.gd"
 
-const NPC_M2 = preload("res://scripts/npc_m2.gd")
+const NPC_M2 = preload("res://scripts/npc_conduct.gd")
 
-# Milestone 2 keeps the proven courtyard layout but gives the large exterior
-# scenery real collision and restores reactive NPCs.
+# Stable M2 layout: only the NPC class changed for conduct behavior.
 func _spawn_npc(name_text: String, id: String, pos: Vector3, color: Color) -> void:
     var npc = NPC_M2.new()
     npc.display_name = name_text

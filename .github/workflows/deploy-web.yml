@@ -74,6 +74,10 @@ jobs:
         shell: bash
         run: godot --headless --path . res://tests/SavePositionRecoverySmoke.tscn
 
+      - name: Smoke-test NPC conduct and disposition
+        shell: bash
+        run: godot --headless --path . res://tests/ConductSmoke.tscn
+
       - name: Export browser build with cache-busted package names
         shell: bash
         run: |
