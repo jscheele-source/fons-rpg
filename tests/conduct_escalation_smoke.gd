@@ -12,173 +12,131 @@ func _run_test() -> void:
     add_child(main)
     for _i in range(8):
         await get_tree().process_frame
-    if str(main.get_script().resource_path) != "res://scripts/world_m2.gd":
-        _fail("Escalation changed the M2 world or added garden geometry.")
+    var script: Script = main.get_script()
+    if script == null or script.get_base_script() == null or script.get_base_script().resource_path != "res://scripts/world_m2.gd":
+        _fail("Escalation requires direct inheritance from stable M2.")
         return
     if main.get_node_or_null("WestBotanicalCloister") != null or main.get_node_or_null("M4GardenLayers") != null:
-        _fail("Escalation reintroduced procedural gardens.")
+        _fail("Procedural garden returned.")
         return
-
     var player = main.get_node_or_null("Player")
-    var cael = _by_display_name(main, "Brother Cael")
-    var varro = _by_display_name(main, "Preceptor Varro")
-    var sel = _by_display_name(main, "Archivist Sel")
-    var door = _by_display_name(main, "Main Monastic Dwelling")
-    var post = _by_script(main, "res://scripts/training_dummy.gd")
-    var terminal = _by_title(main, "Annex Terminal 3")
+    var cael = _find(main, "display_name", "Brother Cael")
+    var varro = _find(main, "display_name", "Preceptor Varro")
+    var sel = _find(main, "display_name", "Archivist Sel")
+    var door = _find(main, "display_name", "Main Monastic Dwelling")
+    var post = _find(main, "script_path", "res://scripts/training_dummy.gd")
+    var terminal = _find(main, "title", "Annex Terminal 3")
     if player == null or cael == null or varro == null or sel == null or door == null or post == null or terminal == null:
-        _fail("Escalation: a required stable M2 actor, door, post or terminal is missing.")
+        _fail("Required M2 actors and interactables must remain present.")
         return
-
-    # Independently unlock the dwelling to prove that conduct, not first_steps,
-    # is what later locks this existing door.
     GameState.quests["first_steps"]["state"] = "completed"
     GameState.world_flags["interior_admitted"] = true
     if door._is_locked() or CONDUCT.access_suspended():
-        _fail("Escalation: an admitted, clean player cannot enter the dwelling.")
+        _fail("Clean admission must open dwelling.")
         return
-
-    # Preserve all the original low-level report/reprimand/restitution behavior.
     cael.take_damage(1.0, player)
     cael.take_damage(1.0, player)
     if not CONDUCT.pending() or CONDUCT.tier() != 1:
-        _fail("Escalation: original first hearing broken.")
+        _fail("Two assaults must trigger first hearing.")
         return
     varro.choose("conduct_reprimand")
-    if CONDUCT.pending() or not bool(GameState.world_flags.get("conduct_probation", false)):
-        _fail("Escalation: first reprimand did not restore duties with probation.")
+    if CONDUCT.pending() or not GameState.world_flags.get("conduct_probation", false):
+        _fail("Reprimand must start probation.")
         return
     sel.take_damage(1.0, player)
     varro.choose("conduct_restitution")
-    if CONDUCT.pending() or int(GameState.credits) != 5 or CONDUCT.tier() != 1:
-        _fail("Escalation: second report still requires 20-credit restitution.")
+    if CONDUCT.pending() or GameState.credits != 5 or CONDUCT.tier() != 1:
+        _fail("Restitution must close second report for 20 credits.")
         return
-
-    # The fourth assault changes actual access and requires an escalation path.
     cael.take_damage(1.0, player)
-    if not CONDUCT.pending() or CONDUCT.tier() != 2 or not CONDUCT.access_suspended() or CONDUCT.fine_due() != 60:
-        _fail("Escalation: fourth assault did not revoke dwelling access or increase the fine.")
-        return
-    if not door._is_locked():
-        _fail("Escalation: main dwelling ignored disciplinary lock.")
+    if not CONDUCT.pending() or CONDUCT.tier() != 2 or not CONDUCT.access_suspended() or CONDUCT.fine_due() != 60 or not door._is_locked():
+        _fail("Fourth assault must suspend access and escalate fine.")
         return
     var hearing: Dictionary = varro.get_dialogue()
-    if not _has_action(hearing, "conduct_service") or _has_action(hearing, "conduct_reprimand"):
-        _fail("Escalation: Varro still allows a routine reprimand for serious repeat violence.")
+    if not _choice(hearing, "conduct_service") or _choice(hearing, "conduct_reprimand"):
+        _fail("Serious hearing must offer service instead of routine reprimand.")
         return
     varro.choose("conduct_service")
     if CONDUCT.pending() or not CONDUCT.service_active() or not CONDUCT.duty_blocked() or not door._is_locked():
-        _fail("Escalation: supervised restitution failed to keep services and access suspended.")
+        _fail("Service must keep duties and access suspended.")
         return
-    if str(sel.get_dialogue().get("text", "")).find("service") < 0:
-        _fail("Escalation: residents resumed normal quests during supervised restitution.")
+    if not str(sel.get_dialogue().get("text", "")).contains("service"):
+        _fail("Archivist must refuse business while service active.")
         return
-    var previous_state: String = str(GameState.quests["missing_copy"]["state"])
+    var old_state: String = GameState.quests["missing_copy"]["state"]
     sel.choose("archive_work")
-    if str(GameState.quests["missing_copy"]["state"]) != previous_state:
-        _fail("Escalation: calling resident.choose directly bypassed the duty lock.")
+    if GameState.quests["missing_copy"]["state"] != old_state or CONDUCT.finish_service() or CONDUCT.service_ready():
+        _fail("Service may not be bypassed by direct dialogue or early completion.")
         return
-    if CONDUCT.finish_service() or CONDUCT.service_ready():
-        _fail("Escalation: unfinished service was signed off without tasks.")
-        return
-
     post.interact(player)
     post.interact(player)
     if not CONDUCT.service_done("post") or CONDUCT.service_ready():
-        _fail("Escalation: training-post audit did not register once, or ended service too early.")
+        _fail("Practice post audit should register once.")
         return
     terminal.interact(player)
     if not CONDUCT.service_done("annex") or not CONDUCT.service_ready():
-        _fail("Escalation: annex audit failed to complete two-step service.")
+        _fail("Annex audit should unlock service completion.")
         return
     varro.choose("conduct_finish_service")
-    if CONDUCT.duty_blocked() or door._is_locked() or bool(GameState.world_flags.get("conduct_probation", false)):
-        _fail("Escalation: completed service did not restore privileges.")
+    if CONDUCT.duty_blocked() or door._is_locked() or GameState.world_flags.get("conduct_probation", false) or int(GameState.world_flags.get("conduct_service_completed", 0)) != 1:
+        _fail("Finished service must restore access and retain one record.")
         return
-    if int(GameState.world_flags.get("conduct_service_completed", 0)) != 1:
-        _fail("Escalation: the service record was not retained.")
-        return
-
-    # Further violence, even after restitution, leads to an exclusion review.
-    cael.take_damage(1.0, player) # fifth total; report pending
+    cael.take_damage(1.0, player)
     player.global_position = Vector3(-104, 1.25, -13)
-    sel.take_damage(1.0, player) # sixth total; now inside the monastery
+    sel.take_damage(1.0, player)
     if CONDUCT.tier() != 3 or not CONDUCT.pending() or CONDUCT.fine_due() != 120:
-        _fail("Escalation: repeated violence did not trigger the exclusion review.")
+        _fail("Sixth assault must trigger exclusion review.")
         return
-    if player.global_position.distance_to(Vector3(0, 1.25, 13)) > 0.02:
-        _fail("Escalation: severe indoor assault did not escort player to safe courtyard.")
-        return
-    if not door._is_locked() or not _has_action(varro.get_dialogue(), "conduct_service"):
-        _fail("Escalation: excluded player has no viable non-monetary hearing.")
+    if player.global_position.distance_to(Vector3(0, 1.25, 13)) > 0.02 or not door._is_locked() or not _choice(varro.get_dialogue(), "conduct_service"):
+        _fail("Exclusion must escort player outside while preserving service route.")
         return
     GameState.add_credits(200)
-    if not _has_action(varro.get_dialogue(), "conduct_restitution"):
-        _fail("Escalation: sufficiently funded player lacks higher restitution option.")
+    if not _choice(varro.get_dialogue(), "conduct_restitution"):
+        _fail("Sufficiently funded player should have restitution route.")
         return
     varro.choose("conduct_service")
     post.interact(player)
     terminal.interact(player)
     if CONDUCT.service_ready() or not CONDUCT.service_required("drill"):
-        _fail("Escalation: exclusion review requires a three-strike controlled drill.")
+        _fail("Exclusion additionally requires controlled drill.")
         return
     for _i in range(3):
         post.take_damage(2.0, player)
     if not CONDUCT.service_done("drill") or not CONDUCT.service_ready():
-        _fail("Escalation: completing three controlled strikes did not finish the drill.")
+        _fail("Three practice strikes must finish drill.")
         return
     varro.choose("conduct_finish_service")
-    if CONDUCT.duty_blocked() or CONDUCT.access_suspended() or CONDUCT.pending() or door._is_locked():
-        _fail("Escalation: exclusion remediation did not reopen the monastery.")
+    if CONDUCT.duty_blocked() or CONDUCT.access_suspended() or CONDUCT.pending() or door._is_locked() or int(GameState.world_flags.get("conduct_service_completed", 0)) != 2:
+        _fail("Finished exclusion service must restore access and retain records.")
         return
-    if int(GameState.world_flags.get("conduct_service_completed", 0)) != 2:
-        _fail("Escalation: previous service completion did not persist.")
-        return
-
     var saved: Variant = JSON.parse_string(JSON.stringify(GameState.world_flags))
     if typeof(saved) != TYPE_DICTIONARY:
-        _fail("Escalation: conduct flags failed JSON save round-trip.")
+        _fail("Conduct history failed JSON round-trip.")
         return
     GameState.world_flags = saved
     if CONDUCT.tier() != 3 or CONDUCT.access_suspended() or int(GameState.world_flags.get("conduct_total", 0)) != 6:
-        _fail("Escalation: case history was lost or erroneously relocked on load.")
+        _fail("Load lost conduct history or relocked access.")
         return
     GameState.new_game({"name": "Clean Slate", "species": "Human", "background": "Pilgrim", "answers": []})
     if CONDUCT.pending() or CONDUCT.duty_blocked() or CONDUCT.access_suspended() or CONDUCT.tier() != 0:
-        _fail("Escalation: old case leaked into a new game.")
+        _fail("New game must clear old conduct state.")
         return
-
-    print("Escalation smoke test passed: stable M2, rising fines, locked dwelling, quest protection, two-stage service, exclusion escort, supervised drill, lasting case history and clean new game.")
+    print("Escalation smoke test passed: M2 inheritance, fines, access, hearings, service, escort, drill, persistence, reset.")
     get_tree().quit(0)
 
-func _by_display_name(root: Node, wanted: String):
-    if root.get("display_name") != null and str(root.get("display_name")) == wanted:
+func _find(root: Node, key: String, value: String):
+    if key == "script_path":
+        if root.get_script() != null and root.get_script().resource_path == value:
+            return root
+    elif root.get(key) != null and str(root.get(key)) == value:
         return root
     for child in root.get_children():
-        var result = _by_display_name(child, wanted)
-        if result != null:
-            return result
+        var found = _find(child, key, value)
+        if found != null:
+            return found
     return null
 
-func _by_title(root: Node, wanted: String):
-    if root.get("title") != null and str(root.get("title")) == wanted:
-        return root
-    for child in root.get_children():
-        var result = _by_title(child, wanted)
-        if result != null:
-            return result
-    return null
-
-func _by_script(root: Node, wanted: String):
-    if root.get_script() != null and str(root.get_script().resource_path) == wanted:
-        return root
-    for child in root.get_children():
-        var result = _by_script(child, wanted)
-        if result != null:
-            return result
-    return null
-
-func _has_action(dialogue: Dictionary, wanted: String) -> bool:
+func _choice(dialogue: Dictionary, wanted: String) -> bool:
     for choice in dialogue.get("choices", []):
         if str(choice.get("action", "")) == wanted:
             return true
