@@ -1,8 +1,8 @@
 extends "res://scripts/world_m1.gd"
 
-const NPC_M2 = preload("res://scripts/npc_conduct.gd")
+const NPC_M2 = preload("res://scripts/npc_conduct_response.gd")
 
-# Stable M2 layout: only the NPC class changed for conduct behavior.
+# Stable M2 layout: only the NPC class changed for active conduct behavior.
 func _spawn_npc(name_text: String, id: String, pos: Vector3, color: Color) -> void:
     var npc = NPC_M2.new()
     npc.display_name = name_text
