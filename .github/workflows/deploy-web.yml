@@ -86,6 +86,10 @@ jobs:
         shell: bash
         run: godot --headless --path . res://tests/ConductResponseSmoke.tscn
 
+      - name: Smoke-test Flame Beneath foundation before export
+        shell: bash
+        run: godot --headless --path . res://tests/FlameFoundationSmoke.tscn
+
       - name: Export browser build with cache-busted package names
         shell: bash
         run: |

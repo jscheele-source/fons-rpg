@@ -1,10 +1,10 @@
 [gd_scene load_steps=14 format=3]
 
-[ext_resource type="Script" path="res://scripts/world_m2.gd" id="1_world"]
-[ext_resource type="Script" path="res://scripts/player_m2.gd" id="2_player"]
+[ext_resource type="Script" path="res://scripts/world_flame_foundation.gd" id="1_world"]
+[ext_resource type="Script" path="res://scripts/player_flame_projection.gd" id="2_player"]
 [ext_resource type="Script" path="res://scripts/hud_conduct.gd" id="3_hud"]
 [ext_resource type="Script" path="res://scripts/monastery_interior_v2.gd" id="4_interior"]
-[ext_resource type="Script" path="res://scripts/monastery_gameplay.gd" id="5_monastery_gameplay"]
+[ext_resource type="Script" path="res://scripts/monastery_gameplay_flame.gd" id="5_monastery_gameplay"]
 [ext_resource type="Script" path="res://scripts/visual_world_pass_v2.gd" id="6_visual_world"]
 [ext_resource type="Script" path="res://scripts/monastery_expansion.gd" id="7_expansion"]
 [ext_resource type="Script" path="res://scripts/monastery_population_m2.gd" id="8_population"]
