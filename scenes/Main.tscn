@@ -1,8 +1,8 @@
-[gd_scene load_steps=14 format=3]
+[gd_scene load_steps=15 format=3]
 
-[ext_resource type="Script" path="res://scripts/world_flame_foundation.gd" id="1_world"]
+[ext_resource type="Script" path="res://scripts/world_flame_beneath.gd" id="1_world"]
 [ext_resource type="Script" path="res://scripts/player_flame_projection.gd" id="2_player"]
-[ext_resource type="Script" path="res://scripts/hud_conduct.gd" id="3_hud"]
+[ext_resource type="Script" path="res://scripts/hud_flame_beneath.gd" id="3_hud"]
 [ext_resource type="Script" path="res://scripts/monastery_interior_v2.gd" id="4_interior"]
 [ext_resource type="Script" path="res://scripts/monastery_gameplay_flame.gd" id="5_monastery_gameplay"]
 [ext_resource type="Script" path="res://scripts/visual_world_pass_v2.gd" id="6_visual_world"]
@@ -10,6 +10,7 @@
 [ext_resource type="Script" path="res://scripts/monastery_population_m2.gd" id="8_population"]
 [ext_resource type="Script" path="res://scripts/monastery_route_repair.gd" id="9_route_repair"]
 [ext_resource type="Script" path="res://scripts/interior_polish_m2.gd" id="10_polish"]
+[ext_resource type="Script" path="res://scripts/flame_beneath_addon.gd" id="11_flame_beneath"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape_player"]
 radius = 0.45
@@ -82,6 +83,9 @@ script = ExtResource("9_route_repair")
 
 [node name="Milestone2Polish" type="Node3D" parent="."]
 script = ExtResource("10_polish")
+
+[node name="FlameBeneath" type="Node3D" parent="."]
+script = ExtResource("11_flame_beneath")
 
 [node name="HUD" type="CanvasLayer" parent="."]
 script = ExtResource("3_hud")
