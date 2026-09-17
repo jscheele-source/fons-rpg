@@ -1,5 +1,17 @@
 extends "res://scripts/davian_conduct_response.gd"
 
+const VISUAL = preload("res://scripts/refined_humanoid_visual.gd")
+
+func _build_body() -> void:
+    var shape := CapsuleShape3D.new()
+    shape.radius = 0.43
+    shape.height = 1.95
+    var collision := CollisionShape3D.new()
+    collision.shape = shape
+    collision.position.y = 0.98
+    add_child(collision)
+    VISUAL.build(self, body_color, Color(0.50, 0.36, 0.28))
+
 # Projection follows the existing Measure of Fire lesson; the old lesson and
 # Varro's disciplinary restrictions retain precedence.
 func get_dialogue() -> Dictionary:
