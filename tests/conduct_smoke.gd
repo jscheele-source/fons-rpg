@@ -13,10 +13,10 @@ func _run_test() -> void:
     for _i in range(7):
         await get_tree().process_frame
 
-    # Allow a one-layer gameplay/model wrapper, but never a replacement terrain.
-    var world_script: Script = main.get_script()
-    if world_script == null or world_script.get_base_script() == null or str(world_script.get_base_script().resource_path) != "res://scripts/world_m2.gd":
-        _fail("Conduct: world must directly inherit the stable M2 implementation.")
+    # Gameplay/model wrappers may layer over M2, but terrain must still descend
+    # from the browser-confirmed stable implementation and gardens must stay out.
+    if not _inherits_script(main.get_script(), "res://scripts/world_m2.gd"):
+        _fail("Conduct: active world no longer inherits the stable M2 implementation.")
         return
     if main.get_node_or_null("WestBotanicalCloister") != null or main.get_node_or_null("M4GardenLayers") != null:
         _fail("Conduct: garden geometry was reintroduced.")
@@ -119,6 +119,14 @@ func _run_test() -> void:
 
     print("Conduct smoke test passed: M2-derived world, witnesses, escalating reports, duty lock, hearing, apologies, probation, restitution, save flags and new-game reset.")
     get_tree().quit(0)
+
+func _inherits_script(script: Script, wanted_path: String) -> bool:
+    var current := script
+    while current != null:
+        if str(current.resource_path) == wanted_path:
+            return true
+        current = current.get_base_script()
+    return false
 
 func _find_by_name(root: Node, wanted: String):
     if root.get("display_name") != null and str(root.get("display_name")) == wanted:
