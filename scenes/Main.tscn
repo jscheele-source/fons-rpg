@@ -1,4 +1,4 @@
-[gd_scene load_steps=15 format=3]
+[gd_scene load_steps=16 format=3]
 
 [ext_resource type="Script" path="res://scripts/world_flame_beneath.gd" id="1_world"]
 [ext_resource type="Script" path="res://scripts/player_flame_projection.gd" id="2_player"]
@@ -11,6 +11,7 @@
 [ext_resource type="Script" path="res://scripts/monastery_route_repair.gd" id="9_route_repair"]
 [ext_resource type="Script" path="res://scripts/interior_polish_m2.gd" id="10_polish"]
 [ext_resource type="Script" path="res://scripts/flame_beneath_addon.gd" id="11_flame_beneath"]
+[ext_resource type="Script" path="res://scripts/temple_records_annex.gd" id="12_records_annex"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape_player"]
 radius = 0.45
@@ -86,6 +87,9 @@ script = ExtResource("10_polish")
 
 [node name="FlameBeneath" type="Node3D" parent="."]
 script = ExtResource("11_flame_beneath")
+
+[node name="LowerRecords" type="Node3D" parent="."]
+script = ExtResource("12_records_annex")
 
 [node name="HUD" type="CanvasLayer" parent="."]
 script = ExtResource("3_hud")
