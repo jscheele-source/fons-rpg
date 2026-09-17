@@ -13,8 +13,8 @@ func _run() -> void:
         await get_tree().process_frame
     await get_tree().physics_frame
 
-    if str(main.get_script().resource_path) != "res://scripts/world_flame_foundation.gd":
-        _fail("Flame foundation: stable world wrapper is not active.")
+    if not _inherits_script(main.get_script(), "res://scripts/world_flame_foundation.gd"):
+        _fail("Flame foundation: active world no longer includes the tested flame-foundation wrapper.")
         return
     if main.get_node_or_null("MonasteryInterior/IustitiaMonasteryInterior") == null:
         _fail("Flame foundation: the working monastery interior is missing.")
@@ -75,6 +75,14 @@ func _run() -> void:
         return
     print("Flame foundation smoke passed: stable M2 world, refined Cael, Davian training, visible bolt, high cost, and low-charge guard.")
     get_tree().quit(0)
+
+func _inherits_script(script: Script, wanted_path: String) -> bool:
+    var current := script
+    while current != null:
+        if str(current.resource_path) == wanted_path:
+            return true
+        current = current.get_base_script()
+    return false
 
 func _find_character(root: Node, wanted: String):
     if root.get("display_name") != null and str(root.get("display_name")) == wanted:
