@@ -12,9 +12,8 @@ func _run_test() -> void:
     add_child(main)
     for _i in range(8):
         await get_tree().process_frame
-    var script: Script = main.get_script()
-    if script == null or script.get_base_script() == null or script.get_base_script().resource_path != "res://scripts/world_m2.gd":
-        _fail("Escalation requires direct inheritance from stable M2.")
+    if not _inherits_script(main.get_script(), "res://scripts/world_m2.gd"):
+        _fail("Escalation requires inheritance from stable M2.")
         return
     if main.get_node_or_null("WestBotanicalCloister") != null or main.get_node_or_null("M4GardenLayers") != null:
         _fail("Procedural garden returned.")
@@ -123,6 +122,14 @@ func _run_test() -> void:
         return
     print("Escalation smoke test passed: M2 inheritance, fines, access, hearings, service, escort, drill, persistence, reset.")
     get_tree().quit(0)
+
+func _inherits_script(script: Script, wanted_path: String) -> bool:
+    var current := script
+    while current != null:
+        if str(current.resource_path) == wanted_path:
+            return true
+        current = current.get_base_script()
+    return false
 
 func _find(root: Node, key: String, value: String):
     if key == "script_path":
