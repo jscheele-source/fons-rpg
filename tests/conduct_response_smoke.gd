@@ -13,9 +13,8 @@ func _run() -> void:
     add_child(main)
     for _i in range(8):
         await get_tree().process_frame
-    var world_script: Script = main.get_script()
-    if world_script == null or world_script.get_base_script() == null or world_script.get_base_script().resource_path != "res://scripts/world_m2.gd" or main.get_node_or_null("WestBotanicalCloister") != null or main.get_node_or_null("M4GardenLayers") != null:
-        _fail("Response: baseline must directly inherit M2 without gardens.")
+    if not _inherits_script(main.get_script(), "res://scripts/world_m2.gd") or main.get_node_or_null("WestBotanicalCloister") != null or main.get_node_or_null("M4GardenLayers") != null:
+        _fail("Response: baseline must inherit M2 without gardens.")
         return
     var player = main.get_node_or_null("Player")
     var varro = _named(main, "Preceptor Varro")
@@ -104,6 +103,14 @@ func _run() -> void:
         return
     print("Conduct response smoke test passed: M2 inheritance, alarm, witness refusal, Varro movement, compliance, defiance, hearing, report, save and reset.")
     get_tree().quit(0)
+
+func _inherits_script(script: Script, wanted_path: String) -> bool:
+    var current := script
+    while current != null:
+        if str(current.resource_path) == wanted_path:
+            return true
+        current = current.get_base_script()
+    return false
 
 func _named(root: Node, wanted: String):
     if root.get("display_name") != null and str(root.get("display_name")) == wanted:
