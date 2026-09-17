@@ -94,6 +94,10 @@ jobs:
         shell: bash
         run: godot --headless --path . res://tests/FlameBeneathSmoke.tscn
 
+      - name: Smoke-test lower records and refined authority models
+        shell: bash
+        run: godot --headless --path . res://tests/TempleRecordsSmoke.tscn
+
       - name: Export browser build with cache-busted package names
         shell: bash
         run: |
